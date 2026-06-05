@@ -1,0 +1,1 @@
+The accounting department receives an invoice from a vendor and logs it into the system. A manager then checks whether the invoice amount is within the budget. If the amount is too high, the invoice is sent back to the vendor for revision. Once verified, the payment is scheduled and the vendor receives a notification about the transaction status.

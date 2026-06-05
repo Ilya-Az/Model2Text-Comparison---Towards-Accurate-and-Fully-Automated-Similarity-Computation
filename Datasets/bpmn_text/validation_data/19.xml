@@ -1,0 +1,7 @@
+<process>
+  <activity role="" action="HR sends welcome package to new employee" objects="" id="activity1"/>
+  <activity role="" action="IT creates user account and configures workstation" objects="" id="activity2"/>
+  <activity role="" action="Manager introduces employee to the team" objects="" id="activity3"/>
+  <activity role="" action="Employee completes compliance training" objects="" id="activity4"/>
+  <activity role="" action="HR registers employee in payroll system" objects="" id="activity5"/>
+</process>

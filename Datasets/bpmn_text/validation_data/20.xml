@@ -1,0 +1,14 @@
+<process>
+  <activity role="" action="Accountant receives and scans the invoice" objects="" id="activity1"/>
+  <activity role="" action="Accountant enters invoice details into the ERP system" objects="" id="activity2"/>
+  <activity role="" action="Manager reviews invoice for approval" objects="" id="activity3"/>
+  <exclusiveGateway id="exclusivegateway1">
+    <branch condition="invoice approved" id="branch1">
+      <activity role="" action="Finance schedules payment" objects="" id="activity4"/>
+      <activity role="" action="System sends payment confirmation to vendor" objects="" id="activity5"/>
+    </branch>
+    <branch condition="invoice rejected" id="branch2">
+      <activity role="" action="Accountant notifies vendor of rejection" objects="" id="activity6"/>
+    </branch>
+  </exclusiveGateway>
+</process>

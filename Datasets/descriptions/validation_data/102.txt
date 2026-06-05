@@ -1,0 +1,3 @@
+Apples are red.
+Bananas are yellow.
+Cherries are sweet.

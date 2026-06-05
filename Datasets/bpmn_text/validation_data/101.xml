@@ -1,0 +1,833 @@
+<testset xmlns="http://cpee.org/ns/properties/2.0">
+  <executionhandler>ruby</executionhandler>
+  <dataelements/>
+  <endpoints>
+    <user>https-post://cpee.org/services/timeout-user.php</user>
+    <auto>https-post://cpee.org/services/timeout-auto.php</auto>
+    <subprocess>https-post://cpee.org/flow/start/url/</subprocess>
+    <timeout>https-post://cpee.org/services/timeout.php</timeout>
+    <send>https-post://cpee.org/ing/correlators/message/send/</send>
+    <receive>https-get://cpee.org/ing/correlators/message/receive/</receive>
+  </endpoints>
+  <attributes>
+    <guarded>none</guarded>
+    <modeltype>CPEE</modeltype>
+    <theme>preset</theme>
+    <guarded_id/>
+    <info>03784276_main_process_final</info>
+    <creator>Christine Ashcreek</creator>
+    <author>Christine Ashcreek</author>
+    <model_uuid>0fe76ffb-2fef-45f6-a08f-4266e62bbd32</model_uuid>
+    <model_version/>
+    <design_stage>development</design_stage>
+    <design_dir>Teaching.dir/Prak.dir/TUM-Prak-25-WS.dir/Aufgabe_3a.dir</design_dir>
+  </attributes>
+  <description>
+    <description xmlns="http://cpee.org/ns/description/1.0"
+      xmlns:a="http://cpee.org/ns/annotation/1.0">
+      <call id="a1" endpoint="auto" a:alt_id="1">
+        <parameters>
+          <label>Receive customer order and properties</label>
+          <color/>
+          <arguments>
+            <timeout>2</timeout>
+            <data/>
+          </arguments>
+        </parameters>
+        <code>
+          <signal/>
+          <prepare/>
+          <finalize output="result">data.order = {'customer_name': ["Bob", "Alice", "Charlie"].sample, 'quantity': [10, 50, 100].sample, 'guide_bar_length': ["35cm", "45cm", "50cm"].sample, 'chain_width': ["1.1mm", "1.3mm", "1.6mm"].sample, 'engine_type': ["Electric", "Petrol", "Battery"].sample, 'handle_material': ["Reinforced Plastic", "Aluminum", "Rubberized"].sample, 'chain_pitch': ["3/8 inch", "0.325 inch", "0.404 inch"].sample}</finalize>
+          <update output="result"/>
+          <rescue output="result"/>
+        </code>
+        <annotations>
+          <_generic/>
+          <_logging_behavior>
+            <_exclude/>
+            <_include/>
+          </_logging_behavior>
+          <_timing>
+            <_timing_weight/>
+            <_timing_avg/>
+            <explanations/>
+          </_timing>
+          <_shifting>
+            <_shifting_type>Duration</_shifting_type>
+          </_shifting>
+          <_context_data_analysis>
+            <probes/>
+            <ips/>
+          </_context_data_analysis>
+          <report>
+            <url/>
+          </report>
+          <_notes>
+            <_notes_general/>
+          </_notes>
+        </annotations>
+        <documentation>
+          <input/>
+          <output/>
+          <implementation>
+            <description/>
+          </implementation>
+          <code>
+            <description/>
+          </code>
+        </documentation>
+      </call>
+      <loop mode="post_test" condition="data.inspection['passed'] == false">
+        <parallel wait="-1" cancel="last" a:alt_id="2">
+          <parallel_branch>
+            <call id="a7" endpoint="auto" a:alt_id="3">
+              <parameters>
+                <label>Order guide bars</label>
+                <color/>
+                <arguments>
+                  <timeout>2</timeout>
+                  <data>
+                    <data1>!data.order['guide_bar_length']</data1>
+                    <data2>!data.order['quantity']</data2>
+                  </data>
+                </arguments>
+              </parameters>
+              <code>
+                <signal/>
+                <prepare/>
+                <finalize output="result">data.bar_supply = {'status': ["ordered"].sample, 'supplier_id': ["SupA", "SupB"].sample, 'expected_delivery': [1, 2, 3].sample}</finalize>
+                <update output="result"/>
+                <rescue output="result"/>
+              </code>
+              <annotations>
+                <_generic/>
+                <_logging_behavior>
+                  <_exclude/>
+                  <_include/>
+                </_logging_behavior>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+                <code>
+                  <description/>
+                </code>
+              </documentation>
+            </call>
+            <call id="a13" endpoint="auto" a:alt_id="6">
+              <parameters>
+                <label>Receive guide bars</label>
+                <color/>
+                <arguments>
+                  <timeout>2</timeout>
+                  <data>
+                    <data1>!data.bar_supply['supplier_id']</data1>
+                  </data>
+                </arguments>
+              </parameters>
+              <code>
+                <signal/>
+                <prepare/>
+                <finalize output="result">data.bar_supply['status'] = "received"</finalize>
+                <update output="result"/>
+                <rescue output="result"/>
+              </code>
+              <annotations>
+                <_generic/>
+                <_logging_behavior>
+                  <_exclude/>
+                  <_include/>
+                </_logging_behavior>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+                <code>
+                  <description/>
+                </code>
+              </documentation>
+            </call>
+          </parallel_branch>
+          <parallel_branch>
+            <call id="a9" endpoint="auto" a:alt_id="4">
+              <parameters>
+                <label>Order chains</label>
+                <color/>
+                <arguments>
+                  <timeout>2</timeout>
+                  <data>
+                    <data1>!data.order['chain_width']</data1>
+                    <data2>!data.order['chain_pitch']</data2>
+                    <data3>!data.order['quantity']</data3>
+                  </data>
+                </arguments>
+              </parameters>
+              <code>
+                <signal/>
+                <prepare/>
+                <finalize output="result">data.chain_supply = {'status': ["ordered"].sample, 'supplier_id': ["ChainCo", "SteelWorks"].sample}</finalize>
+                <update output="result"/>
+                <rescue output="result"/>
+              </code>
+              <annotations>
+                <_generic/>
+                <_logging_behavior>
+                  <_exclude/>
+                  <_include/>
+                </_logging_behavior>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+                <code>
+                  <description/>
+                </code>
+              </documentation>
+            </call>
+            <call id="a15" endpoint="auto" a:alt_id="7">
+              <parameters>
+                <label>Receive chains</label>
+                <color/>
+                <arguments>
+                  <timeout>2</timeout>
+                  <data>
+                    <data1>!data.chain_supply['supplier_id']</data1>
+                  </data>
+                </arguments>
+              </parameters>
+              <code>
+                <signal/>
+                <prepare/>
+                <finalize output="result">data.chain_supply['status'] = "received"</finalize>
+                <update output="result"/>
+                <rescue output="result"/>
+              </code>
+              <annotations>
+                <_generic/>
+                <_logging_behavior>
+                  <_exclude/>
+                  <_include/>
+                </_logging_behavior>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+                <code>
+                  <description/>
+                </code>
+              </documentation>
+            </call>
+          </parallel_branch>
+          <parallel_branch>
+            <call id="a11" endpoint="auto" a:alt_id="5">
+              <parameters>
+                <label>Order engines</label>
+                <color/>
+                <arguments>
+                  <timeout>2</timeout>
+                  <data>
+                    <data1>!data.order['engine_type']</data1>
+                    <data2>!data.order['quantity']</data2>
+                  </data>
+                </arguments>
+              </parameters>
+              <code>
+                <signal/>
+                <prepare/>
+                <finalize output="result">data.engine_supply = {'status': ["ordered"].sample, 'supplier_id': ["MotorX", "EngineY"].sample}</finalize>
+                <update output="result"/>
+                <rescue output="result"/>
+              </code>
+              <annotations>
+                <_generic/>
+                <_logging_behavior>
+                  <_exclude/>
+                  <_include/>
+                </_logging_behavior>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+                <code>
+                  <description/>
+                </code>
+              </documentation>
+            </call>
+            <call id="a17" endpoint="auto" a:alt_id="8">
+              <parameters>
+                <label>Receive engines</label>
+                <color/>
+                <arguments>
+                  <timeout>2</timeout>
+                  <data>
+                    <data1>!data.engine_supply['supplier_id']</data1>
+                  </data>
+                </arguments>
+              </parameters>
+              <code>
+                <signal/>
+                <prepare/>
+                <finalize output="result">data.engine_supply['status'] = "received"</finalize>
+                <update output="result"/>
+                <rescue output="result"/>
+              </code>
+              <annotations>
+                <_generic/>
+                <_logging_behavior>
+                  <_exclude/>
+                  <_include/>
+                </_logging_behavior>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+                <code>
+                  <description/>
+                </code>
+              </documentation>
+            </call>
+          </parallel_branch>
+        </parallel>
+        <call id="a25" endpoint="auto" a:alt_id="10">
+          <parameters>
+            <label>Inspect all parts</label>
+            <color/>
+            <arguments>
+              <timeout>2</timeout>
+              <data>
+                <data1>!data.bar_supply['status']</data1>
+                <data2>!data.chain_supply['status']</data2>
+                <data3>!data.engine_supply['status']</data3>
+              </data>
+            </arguments>
+          </parameters>
+          <code>
+            <signal/>
+            <prepare/>
+            <finalize output="result">data.inspection = {'passed': [true, false].sample, 'inspector_note': ["All OK", "Bar bent", "Chain rusted"].sample}</finalize>
+            <update output="result"/>
+            <rescue output="result"/>
+          </code>
+          <annotations>
+            <_generic/>
+            <_logging_behavior>
+              <_exclude/>
+              <_include/>
+            </_logging_behavior>
+            <_timing>
+              <_timing_weight/>
+              <_timing_avg/>
+              <explanations/>
+            </_timing>
+            <_shifting>
+              <_shifting_type>Duration</_shifting_type>
+            </_shifting>
+            <_context_data_analysis>
+              <probes/>
+              <ips/>
+            </_context_data_analysis>
+            <report>
+              <url/>
+            </report>
+            <_notes>
+              <_notes_general/>
+            </_notes>
+          </annotations>
+          <documentation>
+            <input/>
+            <output/>
+            <implementation>
+              <description/>
+            </implementation>
+            <code>
+              <description/>
+            </code>
+          </documentation>
+        </call>
+      </loop>
+      <parallel wait="-1" cancel="last" a:alt_id="12">
+        <parallel_branch>
+          <call id="a33" endpoint="auto" a:alt_id="13">
+            <parameters>
+              <label>Assemble first chainsaw</label>
+              <color/>
+              <arguments>
+                <timeout>2</timeout>
+                <data>
+                  <data1>!data.order['handle_material']</data1>
+                  <data2>!data.order['guide_bar_length']</data2>
+                  <data3>!data.order['engine_type']</data3>
+                </data>
+              </arguments>
+            </parameters>
+            <code>
+              <signal/>
+              <prepare/>
+              <finalize output="result">data.prototype = {'serial_number': ["SN-001", "SN-999"].sample, 'assembly_date': ["Monday", "Tuesday"].sample}</finalize>
+              <update output="result"/>
+              <rescue output="result"/>
+            </code>
+            <annotations>
+              <_generic/>
+              <_logging_behavior>
+                <_exclude/>
+                <_include/>
+              </_logging_behavior>
+              <_timing>
+                <_timing_weight/>
+                <_timing_avg/>
+                <explanations/>
+              </_timing>
+              <_shifting>
+                <_shifting_type>Duration</_shifting_type>
+              </_shifting>
+              <_context_data_analysis>
+                <probes/>
+                <ips/>
+              </_context_data_analysis>
+              <report>
+                <url/>
+              </report>
+              <_notes>
+                <_notes_general/>
+              </_notes>
+            </annotations>
+            <documentation>
+              <input/>
+              <output/>
+              <implementation>
+                <description/>
+              </implementation>
+              <code>
+                <description/>
+              </code>
+            </documentation>
+          </call>
+        </parallel_branch>
+        <parallel_branch>
+          <call id="a35" endpoint="auto" a:alt_id="14">
+            <parameters>
+              <label>Send production update1</label>
+              <color/>
+              <arguments>
+                <timeout>2</timeout>
+                <data>
+                  <data1>!data.order['customer_name']</data1>
+                  <data2>!data.inspection['passed']</data2>
+                </data>
+              </arguments>
+            </parameters>
+            <code>
+              <signal/>
+              <prepare/>
+              <finalize output="result">data.notification_log = {'msg_id': [101, 102].sample, 'content': ["Prototype assembled", "Quality check passed"].sample}</finalize>
+              <update output="result"/>
+              <rescue output="result"/>
+            </code>
+            <annotations>
+              <_generic/>
+              <_logging_behavior>
+                <_exclude/>
+                <_include/>
+              </_logging_behavior>
+              <_timing>
+                <_timing_weight/>
+                <_timing_avg/>
+                <explanations/>
+              </_timing>
+              <_shifting>
+                <_shifting_type>Duration</_shifting_type>
+              </_shifting>
+              <_context_data_analysis>
+                <probes/>
+                <ips/>
+              </_context_data_analysis>
+              <report>
+                <url/>
+              </report>
+              <_notes>
+                <_notes_general/>
+              </_notes>
+            </annotations>
+            <documentation>
+              <input/>
+              <output/>
+              <implementation>
+                <description/>
+              </implementation>
+              <code>
+                <description/>
+              </code>
+            </documentation>
+          </call>
+        </parallel_branch>
+      </parallel>
+      <call id="a41" endpoint="auto" a:alt_id="16">
+        <parameters>
+          <label>Send first chainsaw to customer</label>
+          <color/>
+          <arguments>
+            <timeout>2</timeout>
+            <data>
+              <data1>!data.prototype['serial_number']</data1>
+              <data2>!data.order['customer_name']</data2>
+            </data>
+          </arguments>
+        </parameters>
+        <code>
+          <signal/>
+          <prepare/>
+          <finalize output="result">data.customer_feedback = {'approved': [true, false].sample, 'comments': ["Great saw", "Too heavy"].sample}</finalize>
+          <update output="result"/>
+          <rescue output="result"/>
+        </code>
+        <annotations>
+          <_generic/>
+          <_logging_behavior>
+            <_exclude/>
+            <_include/>
+          </_logging_behavior>
+          <_timing>
+            <_timing_weight/>
+            <_timing_avg/>
+            <explanations/>
+          </_timing>
+          <_shifting>
+            <_shifting_type>Duration</_shifting_type>
+          </_shifting>
+          <_context_data_analysis>
+            <probes/>
+            <ips/>
+          </_context_data_analysis>
+          <report>
+            <url/>
+          </report>
+          <_notes>
+            <_notes_general/>
+          </_notes>
+        </annotations>
+        <documentation>
+          <input/>
+          <output/>
+          <implementation>
+            <description/>
+          </implementation>
+          <code>
+            <description/>
+          </code>
+        </documentation>
+      </call>
+      <choose mode="exclusive" a:alt_id="17">
+        <alternative condition="data.customer_feedback['approved'] == true">
+          <_probability>
+            <_probability_min/>
+            <_probability_max/>
+            <_probability_avg/>
+          </_probability>
+          <parallel wait="-1" cancel="last" a:alt_id="18">
+            <parallel_branch>
+              <call id="a49" endpoint="auto" a:alt_id="19">
+                <parameters>
+                  <label>Assemble remaining chainsaws</label>
+                  <color/>
+                  <arguments>
+                    <timeout>2</timeout>
+                    <data>
+                      <data1>!data.order['quantity']</data1>
+                      <data2>!data.prototype['serial_number']</data2>
+                    </data>
+                  </arguments>
+                </parameters>
+                <code>
+                  <signal/>
+                  <prepare/>
+                  <finalize output="result">data.bulk_production = {'completed_count': [9, 49, 99].sample, 'batch_id': ["B1", "B2"].sample}</finalize>
+                  <update output="result"/>
+                  <rescue output="result"/>
+                </code>
+                <annotations>
+                  <_generic/>
+                  <_logging_behavior>
+                    <_exclude/>
+                    <_include/>
+                  </_logging_behavior>
+                  <_timing>
+                    <_timing_weight/>
+                    <_timing_avg/>
+                    <explanations/>
+                  </_timing>
+                  <_shifting>
+                    <_shifting_type>Duration</_shifting_type>
+                  </_shifting>
+                  <_context_data_analysis>
+                    <probes/>
+                    <ips/>
+                  </_context_data_analysis>
+                  <report>
+                    <url/>
+                  </report>
+                  <_notes>
+                    <_notes_general/>
+                  </_notes>
+                </annotations>
+                <documentation>
+                  <input/>
+                  <output/>
+                  <implementation>
+                    <description/>
+                  </implementation>
+                  <code>
+                    <description/>
+                  </code>
+                </documentation>
+              </call>
+            </parallel_branch>
+            <parallel_branch>
+              <call id="a51" endpoint="auto" a:alt_id="20">
+                <parameters>
+                  <label>Send production update2</label>
+                  <color/>
+                  <arguments>
+                    <timeout>2</timeout>
+                    <data>
+                      <data1>!data.customer_feedback['approved']</data1>
+                    </data>
+                  </arguments>
+                </parameters>
+                <code>
+                  <signal/>
+                  <prepare/>
+                  <finalize output="result">data.notification_log['content'] = "Bulk production finished"</finalize>
+                  <update output="result"/>
+                  <rescue output="result"/>
+                </code>
+                <annotations>
+                  <_generic/>
+                  <_logging_behavior>
+                    <_exclude/>
+                    <_include/>
+                  </_logging_behavior>
+                  <_timing>
+                    <_timing_weight/>
+                    <_timing_avg/>
+                    <explanations/>
+                  </_timing>
+                  <_shifting>
+                    <_shifting_type>Duration</_shifting_type>
+                  </_shifting>
+                  <_context_data_analysis>
+                    <probes/>
+                    <ips/>
+                  </_context_data_analysis>
+                  <report>
+                    <url/>
+                  </report>
+                  <_notes>
+                    <_notes_general/>
+                  </_notes>
+                </annotations>
+                <documentation>
+                  <input/>
+                  <output/>
+                  <implementation>
+                    <description/>
+                  </implementation>
+                  <code>
+                    <description/>
+                  </code>
+                </documentation>
+              </call>
+            </parallel_branch>
+          </parallel>
+          <call id="a57" endpoint="auto" a:alt_id="22">
+            <parameters>
+              <label>Send remaining chainsaws to customer</label>
+              <color/>
+              <arguments>
+                <timeout>2</timeout>
+                <data>
+                  <data1>!data.bulk_production['batch_id']</data1>
+                  <data2>!data.order['customer_name']</data2>
+                </data>
+              </arguments>
+            </parameters>
+            <code>
+              <signal/>
+              <prepare/>
+              <finalize output="result">data.shipment = {'tracking_code': ["DHL-123", "UPS-456"].sample, 'status': ["shipped"].sample}</finalize>
+              <update output="result"/>
+              <rescue output="result"/>
+            </code>
+            <annotations>
+              <_generic/>
+              <_logging_behavior>
+                <_exclude/>
+                <_include/>
+              </_logging_behavior>
+              <_timing>
+                <_timing_weight/>
+                <_timing_avg/>
+                <explanations/>
+              </_timing>
+              <_shifting>
+                <_shifting_type>Duration</_shifting_type>
+              </_shifting>
+              <_context_data_analysis>
+                <probes/>
+                <ips/>
+              </_context_data_analysis>
+              <report>
+                <url/>
+              </report>
+              <_notes>
+                <_notes_general/>
+              </_notes>
+            </annotations>
+            <documentation>
+              <input/>
+              <output/>
+              <implementation>
+                <description/>
+              </implementation>
+              <code>
+                <description/>
+              </code>
+            </documentation>
+          </call>
+        </alternative>
+        <alternative condition="data.customer_feedback['approved'] == false" language="text/javascript"/>
+      </choose>
+    </description>
+  </description>
+  <transformation>
+    <description type="copy"/>
+    <dataelements type="none"/>
+    <endpoints type="none"/>
+  </transformation>
+</testset>
