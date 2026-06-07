@@ -1,7 +1,7 @@
 <process>
-  <activity role="" action="send welcome package to new employee" objects="" id="activity1"/>
-  <activity role="" action="configure PC and Apps" objects="" id="activity2"/>
-  <activity role="" action="introduce employee to the team" objects="" id="activity3"/>
-  <activity role="" action="employee completes compliance training" objects="" id="activity4"/>
-  <activity role="" action="submit employees payroll data" objects="" id="activity5"/>
+  <activity role="" action="Send welcome package to new employee" objects="" id="activity1"/>
+  <activity role="" action="Configure PC and Apps" objects="" id="activity2"/>
+  <activity role="" action="Introduce employee to the team" objects="" id="activity3"/>
+  <activity role="" action="Employee completes compliance training" objects="" id="activity4"/>
+  <activity role="" action="Submit employees payroll data" objects="" id="activity5"/>
 </process>

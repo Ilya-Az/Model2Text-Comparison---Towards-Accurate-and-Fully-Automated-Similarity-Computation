@@ -272,10 +272,10 @@ def get_threshold(embedding_method, metric, strategy=1, lemmatize=False, remove_
     return ts.get_precomputed_threshold(method_config, strategy, lemmatize, remove_cond)
 
 if __name__ == "__main__":
-    #DOCS = ["19"]
+    DOCS = ["19"]
     #generate_and_save_all_embeddings(DOCS)
 
-    DOCS = ["19"]
+
     LEMMATIZE_DATA = False
     REMOVE_CONDITIONS = False
     
