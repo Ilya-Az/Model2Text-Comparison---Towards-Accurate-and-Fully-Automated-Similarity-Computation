@@ -1,4 +1,4 @@
 The accounting department receives an invoice from a vendor.
 Then the managers enter a new deal, were the details are negotiated, and the costs need to be approved.
-If the amount is too high, the supervisory board takes freetime.
+If the amount is too high, the supervisory board takes free-time.
 Once verified, the payment is scheduled and the the managers receive a notification about the transaction status.
