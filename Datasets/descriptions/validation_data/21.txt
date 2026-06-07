@@ -1,1 +1,4 @@
-A customer submits a complaint through the online portal and an agent reads the message. The support team then investigates the problem and tries to find a resolution. If the issue is straightforward, a solution is immediately communicated to the customer. In complex cases, the complaint is forwarded to a specialist who conducts a deeper analysis. The customer is then asked to confirm whether the issue has been fixed.
+A customer submits a complaint through the support portal.
+The support team then investigates the problem.
+If the issue is straightforward, an answer is transmitted to the customer rapidly.
+In complex cases, the managers are holding a meeting first, and the specialists are subsequently fixing the problem.

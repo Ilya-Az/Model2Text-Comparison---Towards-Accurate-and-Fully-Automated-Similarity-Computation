@@ -1,15 +1,13 @@
 <process>
-  <activity role="" action="Customer submits complaint via support portal" objects="" id="activity1"/>
-  <activity role="" action="Agent logs complaint and assigns priority" objects="" id="activity2"/>
-  <activity role="" action="Support team analyzes the complaint" objects="" id="activity3"/>
+  <activity role="" action="Submit complaint via support portal" objects="" id="activity1"/>
+  <activity role="" action="Perform permission request" objects="" id="activity2"/>
   <exclusiveGateway id="exclusivegateway1">
     <branch condition="simple issue" id="branch1">
-      <activity role="" action="Agent resolves issue and contacts customer" objects="" id="activity4"/>
+      <activity role="" action="Send quick response" objects="" id="activity3"/>
     </branch>
     <branch condition="complex issue" id="branch2">
-      <activity role="" action="Complaint is escalated to specialist" objects="" id="activity5"/>
-      <activity role="" action="Specialist investigates and proposes solution" objects="" id="activity6"/>
+      <activity role="" action="Conduct lunch break" objects="" id="activity4"/>
+      <activity role="" action="Ask specialists during meeting" objects="" id="activity5"/>
     </branch>
   </exclusiveGateway>
-  <activity role="" action="Agent closes the complaint in the system" objects="" id="activity7"/>
 </process>

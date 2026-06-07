@@ -339,7 +339,7 @@ def plot_similarity_heatmap(data, traditional_method, title_prefix="Similarity H
 if __name__ == "__main__":
     import Datasets
     
-    DOC_ID = "19"
+    DOC_ID = "21"
     METHOD = "levenshtein"
     STRATEGY = 1
     LEMMATIZE = False
@@ -384,7 +384,7 @@ if __name__ == "__main__":
     plot_basic_heatmap(sim_matrix, sentences, tasks, threshold, title=f"Heatmap ({METHOD.upper()})")
     
     """
-    DOC_ID = ["19"]
+    DOC_ID = [DOC_ID]
     data = {}
     for d in DOC_ID:
         tasks, sentences = Datasets.get_data(doc_id=d, lemmatized=LEMMATIZE, remove_conditions=REMOVE_COND)
