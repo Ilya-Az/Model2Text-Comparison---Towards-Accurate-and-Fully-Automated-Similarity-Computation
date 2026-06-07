@@ -190,9 +190,9 @@ def save_embeddings_to_file(data, method, lem, rem):
 def generate_and_save_all_embeddings(doc_ids):
     for l in [True, False]:
         for r in [True, False]:
-            #save_embeddings_to_file(get_bert_embeddings(doc_ids, l, r, False), "bert", l, r)
+            save_embeddings_to_file(get_bert_embeddings(doc_ids, l, r, False), "bert", l, r)
             save_embeddings_to_file(get_llm2vec_embeddings(doc_ids, l, r, False), "llm2vec", l, r)
-            #save_embeddings_to_file(get_gemini_embeddings(doc_ids, l, r, load_stored=False), "gemini", l, r)
+            save_embeddings_to_file(get_gemini_embeddings(doc_ids, l, r, load_stored=False), "gemini", l, r)
 
 
 #_________________________compute similarity matrix________________________________________________________
@@ -272,17 +272,21 @@ def get_threshold(embedding_method, metric, strategy=1, lemmatize=False, remove_
     return ts.get_precomputed_threshold(method_config, strategy, lemmatize, remove_cond)
 
 if __name__ == "__main__":
-   
-    DOCS = ["01"]
+    #DOCS = ["19"]
+    #generate_and_save_all_embeddings(DOCS)
+
+    DOCS = ["19"]
     LEMMATIZE_DATA = False
     REMOVE_CONDITIONS = False
     
     EMBEDDING_METHOD = "gemini"
     METRIC = "cos"
 
-    TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
+    TEXT = None 
+    "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
     
-    BPMN_XML = """<testset xmlns="http://cpee.org/ns/properties/2.0">
+    BPMN_XML = None
+    """<testset xmlns="http://cpee.org/ns/properties/2.0">
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">
       <call id="a1" endpoint="auto">
@@ -308,7 +312,7 @@ if __name__ == "__main__":
     </description>
   </description>
 </testset>"""
-   
+
     if EMBEDDING_METHOD == "bert":
         data_bert = get_bert_embeddings(DOCS, lemmatize_data=LEMMATIZE_DATA, remove_conditions=REMOVE_CONDITIONS, text=TEXT, bpmn_xml=BPMN_XML)
         
@@ -339,9 +343,7 @@ if __name__ == "__main__":
             #threshold = get_threshold("llm2vec", METRIC, strategy=1,lemmatize=LEMMATIZE_DATA, remove_cond=REMOVE_CONDITIONS)
             #plot_basic_heatmap(sim_matrix, data_l2v[first_doc_id]["sentences"], data_l2v[first_doc_id]["tasks"], threshold, f"LLM2Vec Embeddings + {METRIC} - Doc: {first_doc_id}")
             plot_similarity_heatmap(data_l2v, "llm2vec", METRIC, title_prefix=f"LLM2Vec Embeddings + {METRIC.upper()}")
-    """
 
-    DOCS = ["11","12","13","14","15","16","17","18","19","20","21"]
-    generate_and_save_all_embeddings(DOCS)
-    """
+
+
     
