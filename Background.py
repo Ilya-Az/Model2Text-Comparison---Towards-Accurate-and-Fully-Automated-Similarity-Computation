@@ -339,8 +339,8 @@ def plot_similarity_heatmap(data, traditional_method, title_prefix="Similarity H
 if __name__ == "__main__":
     import Datasets
     
-    DOC_ID = "01"
-    METHOD = "word2vec"
+    DOC_ID = "19"
+    METHOD = "levenshtein"
     STRATEGY = 1
     LEMMATIZE = False
     REMOVE_COND = False
@@ -384,11 +384,15 @@ if __name__ == "__main__":
     plot_basic_heatmap(sim_matrix, sentences, tasks, threshold, title=f"Heatmap ({METHOD.upper()})")
     
     """
-    DOC_ID = ["01"]
+    DOC_ID = ["19"]
     data = {}
     for d in DOC_ID:
         tasks, sentences = Datasets.get_data(doc_id=d, lemmatized=LEMMATIZE, remove_conditions=REMOVE_COND)
         data[d] = {"sentences": sentences, "tasks": tasks}
         
-    plot_similarity_heatmap(data, METHOD, title_prefix=f"{METHOD.upper()}")
+    #plot_similarity_heatmap(data, METHOD, title_prefix=f"{METHOD.upper()}")
+    sim_matrix = compute_similarity_matrix(METHOD, data[DOC_ID[0]]["sentences"], data[DOC_ID[0]]["tasks"])
+    threshold = get_threshold(METHOD, strategy=STRATEGY, lemmatize=LEMMATIZE, remove_cond=REMOVE_COND)
+    plot_basic_heatmap(sim_matrix, data[DOC_ID[0]]["sentences"], data[DOC_ID[0]]["tasks"], threshold, title=f"Heatmap ({METHOD.upper()})")
+
     
