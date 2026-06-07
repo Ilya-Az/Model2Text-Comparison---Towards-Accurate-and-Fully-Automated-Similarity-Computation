@@ -272,7 +272,7 @@ def get_threshold(embedding_method, metric, strategy=1, lemmatize=False, remove_
     return ts.get_precomputed_threshold(method_config, strategy, lemmatize, remove_cond)
 
 if __name__ == "__main__":
-    DOCS = ["21"]
+    DOCS = ["19"]
     #generate_and_save_all_embeddings(DOCS)
 
 
@@ -312,7 +312,7 @@ if __name__ == "__main__":
     </description>
   </description>
 </testset>"""
-
+"""
     if EMBEDDING_METHOD == "bert":
         data_bert = get_bert_embeddings(DOCS, lemmatize_data=LEMMATIZE_DATA, remove_conditions=REMOVE_CONDITIONS, text=TEXT, bpmn_xml=BPMN_XML)
         
@@ -343,7 +343,7 @@ if __name__ == "__main__":
             #threshold = get_threshold("llm2vec", METRIC, strategy=1,lemmatize=LEMMATIZE_DATA, remove_cond=REMOVE_CONDITIONS)
             #plot_basic_heatmap(sim_matrix, data_l2v[first_doc_id]["sentences"], data_l2v[first_doc_id]["tasks"], threshold, f"LLM2Vec Embeddings + {METRIC} - Doc: {first_doc_id}")
             plot_similarity_heatmap(data_l2v, "llm2vec", METRIC, title_prefix=f"LLM2Vec Embeddings + {METRIC.upper()}")
-
+"""
 
 
     
