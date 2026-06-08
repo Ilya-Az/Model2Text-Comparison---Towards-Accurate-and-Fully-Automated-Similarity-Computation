@@ -18,7 +18,7 @@ from Background import (
 
 #____________________ config _________________________________________________________________________________
 TRAINING_IDS = ["01","02","03","04","05","06","07","08","09","10"] #--> training_IDs for calclating the optimal thresholds
-VALIDATION_IDS = ["11","12","13"] #--> validation_IDs for testing the optimal thresholds
+VALIDATION_IDS = ["19","20","21"] #--> validation_IDs for testing the optimal thresholds
 
 
 LEMMATIZE = False  
