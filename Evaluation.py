@@ -468,7 +468,7 @@ if __name__ == "__main__":
     ]
 
     RUN_TEXT_SIM  = False
-    RUN_MODEL2TEXT= False
+    RUN_MODEL2TEXT = False
     RUN_BEST_OF_TUPLE = False
     RUN_TUPLE = False
     RUN_CONSENSUS = True
