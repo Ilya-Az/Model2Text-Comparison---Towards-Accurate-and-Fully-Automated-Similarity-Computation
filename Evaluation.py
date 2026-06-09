@@ -39,29 +39,81 @@ def text_similarity(sim_matrix, ground_truth):
     return correlation,p_value
 
 def model2text_similarity(sim_matrix, ground_truth, threshold):
-    #for each column i (task), mark only the best matching row (sentence) as predicted TP
     rows, cols = sim_matrix.shape
+    gt_positive = (ground_truth == 1)
+
+    # for each column i (task), mark only the best matching row (sentence) as predicted TP
     predicted = np.zeros((rows, cols), dtype=bool)
     best_indices = get_chronological_max_indices(sim_matrix, threshold)
     for i, best_i in enumerate(best_indices):
         if best_i != -1:
             predicted[best_i, i] = True
 
-    gt_positive = (ground_truth == 1)
+    # reduce GT to one match per column, since model2text can only produce one match per column
+    adjusted_gt = gt_positive.copy()
+    for col in range(cols):
+        gt_rows = np.where(gt_positive[:, col])[0]
+        if len(gt_rows) > 1:
+            # if prediction hits one of the GT matches, keep that one, otherwise keep the first
+            if best_indices[col] != -1 and best_indices[col] in gt_rows:
+                keep = best_indices[col]
+            else:
+                keep = gt_rows[0]
+            adjusted_gt[:, col] = False
+            adjusted_gt[keep, col] = True
 
-    # Jaccard Indx
-    intersection=np.sum(predicted&gt_positive) #bitwis & operator due to matrix 
-    union=np.sum(predicted|gt_positive)
+    # Jaccard Index
+    intersection=np.sum(predicted&adjusted_gt)
+    union=np.sum(predicted|adjusted_gt)
     jaccard_index=intersection/union if union>0 else 0.0
     
     # F1
-    tp=np.sum(predicted&gt_positive)
-    fp=np.sum(predicted & (gt_positive == False))
-    fn=np.sum((predicted == False) & gt_positive)
+    tp=np.sum(predicted&adjusted_gt)
+    fp=np.sum(predicted & (adjusted_gt == False))
+    fn=np.sum((predicted == False) & adjusted_gt)
     precision=tp/(tp+fp) if (tp+fp)>0 else 0.0
     recall=tp/(tp+fn) if (tp+fn)>0 else 0.0
     f1=(2*precision*recall)/(precision+recall) if (precision+recall)>0 else 0.0
-    return round(jaccard_index,2), round(f1,2)
+    return round(jaccard_index,2),round(f1,2)
+
+
+def best_of_tuple_similarity(sim_matrix, groups, ground_truth, threshold):
+    num_sentences = ground_truth.shape[0]
+    num_tasks = ground_truth.shape[1]
+
+    best_indices = get_chronological_max_indices(sim_matrix, threshold)
+
+    # dissolve tuple matches back into individual sentence-task pairs
+    dissolved = np.zeros((num_sentences, num_tasks), dtype=float)
+    for group_col, best_row in enumerate(best_indices):
+        if best_row != -1:
+            for task_index in groups[group_col]:
+                if task_index < num_tasks:
+                    dissolved[best_row, task_index] = 1.0
+    return model2text_similarity(dissolved, ground_truth, threshold=0.5)
+
+
+def tuple_similarity(sim_matrix, sentence_ranges, task_ranges, ground_truth, threshold):
+    num_sentences = ground_truth.shape[0]
+    num_tasks = ground_truth.shape[1]
+
+    best_indices = get_chronological_max_indices(sim_matrix, threshold)
+
+    # dissolve tuple matches back into individual sentence-task pairs
+    dissolved = np.zeros((num_sentences, num_tasks), dtype=float)
+    for task_tuple_col, best_sent_tuple_row in enumerate(best_indices):
+        if best_sent_tuple_row != -1:
+            s_start, s_end = sentence_ranges[best_sent_tuple_row]
+            t_start, t_end = task_ranges[task_tuple_col]
+            for si in range(s_start, s_end + 1):
+                for ti in range(t_start, t_end + 1):
+                    if si < num_sentences and ti < num_tasks:
+                        dissolved[si, ti] = 1.0
+    return model2text_similarity(dissolved, ground_truth, threshold=0.5)
+
+
+def consensus_similarity(consensus_sim, ground_truth, threshold):
+    return model2text_similarity(consensus_sim, ground_truth, threshold)
 
 
 def get_label(cfg):
@@ -395,9 +447,10 @@ def get_gen_GT(doc_id):
 
 if __name__ == "__main__":
     import Datasets
+    import Further_Dimension_Approaches as fda
 
     # --- CONFIGURATION ---
-    model_ids = ["01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21"]#"01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21"
+    model_ids = ["01"]
    
     LEMMATIZE = False
     REMOVE_COND = False
@@ -407,49 +460,87 @@ if __name__ == "__main__":
     EMBEDDING_METHOD   = "bert"
     METRIC             = "cos"   # only used for embedding methods
     TRADITIONAL_METHOD = None # only used if EMBEDDING_METHOD is None
-    # ---------------------
-    """
+
+    # Consensus parameters
+    CONSENSUS_METHODS = [
+        {"traditional": "levenshtein"},
+        {"embedding": "bert", "metric": "cos"}
+    ]
+
+    RUN_TEXT_SIM  = False
+    RUN_MODEL2TEXT= False
+    RUN_BEST_OF_TUPLE = False
+    RUN_TUPLE = False
+    RUN_CONSENSUS = True
+    RUN_BENCHMARK = False
+  
+
+    # build method config
+    if EMBEDDING_METHOD is not None:
+        method_label = f"{EMBEDDING_METHOD.upper()} + {METRIC.upper()}"
+        current_cfg  = {"embedding": EMBEDDING_METHOD, "metric": METRIC}
+    else:
+        method_label = TRADITIONAL_METHOD.upper()
+        current_cfg  = {"traditional": TRADITIONAL_METHOD}
+
     for doc_id in model_ids:
-        if EMBEDDING_METHOD is not None:
-            method_label = f"{EMBEDDING_METHOD.upper()} + {METRIC.upper()}"
-            current_cfg  = {"embedding": EMBEDDING_METHOD, "metric": METRIC}
-        else:
-            method_label = TRADITIONAL_METHOD.upper()
-            current_cfg  = {"traditional": TRADITIONAL_METHOD}
+        print(f"Evaluating Model {doc_id} with method '{method_label}'")
 
-        print(f"\nEvaluating Model {doc_id} with method '{method_label}'...")
-
-        # Load data and compute similarity matrix
+        # Load data and compute similarity matrix (shared by most evaluations)
         data_dict  = ts.load_data(current_cfg, [doc_id], LEMMATIZE, REMOVE_COND)
-        sim_matrix = ts.get_sim_matrix(data_dict[doc_id], current_cfg)
+        data       = data_dict[doc_id]
+        sim_matrix = ts.get_sim_matrix(data, current_cfg)
+        gt_binary  = Datasets.get_ground_truth(doc_id)
+        best_t     = ts.get_precomputed_threshold(current_cfg, STRATEGY, LEMMATIZE, REMOVE_COND)
 
-        # Binary GT (0/1) for model2text evaluation
-        gt_binary = Datasets.get_ground_truth(doc_id)
+        # text Similarity _____
+        if RUN_TEXT_SIM:
+            cor, p = text_similarity(sim_matrix, get_gen_GT(doc_id))
+            print(f"Text Similarity")
+            print(f"  Spearman Correlation: {cor}")
+            print(f"  p-value:              {p}")
 
-        # 3. Find optimal threshold using the chosen strategy
-        if STRATEGY == 1:
-            best_t, _ = ts.strategy1(current_cfg, lemmatize=LEMMATIZE, remove_cond=REMOVE_COND)
-        elif STRATEGY == 2:
-            best_t, _ = ts.strategy2(current_cfg, lemmatize=LEMMATIZE, remove_cond=REMOVE_COND)
-        elif STRATEGY == 3:
-            best_t, _ = ts.strategy3(current_cfg, lemmatize=LEMMATIZE, remove_cond=REMOVE_COND)
+        # _noraml Model2Text Similarity___
+        if RUN_MODEL2TEXT:
+            jaccard, f1 = model2text_similarity(sim_matrix, gt_binary, best_t)
+            print(f"Model2Text Similarity")
+            print(f"  Jaccard Index: {jaccard}")
+            print(f"  GT-F1 Score:   {f1}")
 
-        print("Opt thres (Strat " + str(STRATEGY) + " over train): " + str(round(best_t,2)))
+        # Best-Of-Tuple Matching ___
+        if RUN_BEST_OF_TUPLE:
+            sim_best, groups = fda.best_of_tuple_matching(data, current_cfg)
+            jaccard_bot, f1_bot = best_of_tuple_similarity(sim_best, groups, gt_binary, best_t)
+            print(f"Best-Of-Tuple Matching")
+            print(f"  Jaccard Index: {jaccard_bot}")
+            print(f"  GT-F1 Score:   {f1_bot}")
 
-        # text sim
-        cor,p=text_similarity(sim_matrix,get_gen_GT(doc_id))
-        print(" SpearmanCorrel: "+str(cor)+ ", p-val:"+str(p))
+        # ______ 4. Tuple Matching ______
+        if RUN_TUPLE:
+            sim_tuple, s_tuples, t_tuples, s_ranges, t_ranges = fda.tuple_matching(data, current_cfg)
+            jaccard_tm, f1_tm = tuple_similarity(sim_tuple, s_ranges, t_ranges, gt_binary, best_t)
+            print(f"Tuple Matching")
+            print(f"  Jaccard Index: {jaccard_tm}")
+            print(f"  GT-F1 Score:   {f1_tm}")
 
-        jaccard,f1=model2text_similarity(sim_matrix,gt_binary,best_t)
+        # Consensus Matching ______
+        if RUN_CONSENSUS:
+            consensus_sim, sentences, tasks, match_f1, method_labels = fda.consensus_matching(
+                doc_id, CONSENSUS_METHODS, strategy=STRATEGY, lemmatize=LEMMATIZE, remove_cond=REMOVE_COND
+            )
+            num_methods = len(CONSENSUS_METHODS)
+            min_confidence = int(num_methods * 2 / 3)
+            consensus_t = min_confidence / num_methods
+            jaccard_cm, f1_cm = consensus_similarity(consensus_sim, gt_binary, consensus_t)
+            print(f"Consensus Matching")
+            print(f"  Methods:       {', '.join(method_labels)}")
+            print(f"  Jaccard Index: {jaccard_cm}")
+            print(f"  GT-F1 Score:   {f1_cm}")
 
-        print(f"______Model2Text Similarity Evaluation___")
-        print(f"Jaccard Index: {jaccard}")
-        print(f"F1 Score:      {f1}")
-    """
-    
-   #____________________Benchmark
-    TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
-    BPMN_XML = """<testset xmlns="http://cpee.org/ns/properties/2.0">
+    # _____Benchmark 
+    if RUN_BENCHMARK:
+        TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
+        BPMN_XML = """<testset xmlns="http://cpee.org/ns/properties/2.0">
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">
       <call id="a1" endpoint="auto">
@@ -475,5 +566,7 @@ if __name__ == "__main__":
     </description>
   </description>
 </testset>"""
-
-    benchmark_runtime(TEXT, BPMN_XML)
+        print(f"\n{'='*70}")
+        print("Running Benchmark")
+        print(f"{'='*70}")
+        benchmark_runtime(TEXT, BPMN_XML)

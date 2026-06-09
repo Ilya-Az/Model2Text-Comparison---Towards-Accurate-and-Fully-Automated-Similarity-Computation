@@ -272,14 +272,14 @@ def get_threshold(embedding_method, metric, strategy=1, lemmatize=False, remove_
     return ts.get_precomputed_threshold(method_config, strategy, lemmatize, remove_cond)
 
 if __name__ == "__main__":
-    DOCS = ["19"]
+    DOCS = ["01"]
     #generate_and_save_all_embeddings(DOCS)
 
 
     LEMMATIZE_DATA = False
     REMOVE_CONDITIONS = False
     
-    EMBEDDING_METHOD = "gemini"
+    EMBEDDING_METHOD = "bert"
     METRIC = "cos"
 
     TEXT = None 
