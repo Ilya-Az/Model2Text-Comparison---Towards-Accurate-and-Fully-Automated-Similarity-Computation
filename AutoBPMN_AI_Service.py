@@ -93,8 +93,8 @@ def process(body):
 
 
 def compute_basic_f1(text, bpmn_xml):
-    LEMMATIZE=True #set permantly  ###############################
-    REMOVE_COND=True#set permantly ##################################
+    LEMMATIZE=True #set permanently  ###############################
+    REMOVE_COND=True#set permanently ##################################
     cfg = {"embedding": "bert", "metric": "cos"}
     data_dict = ts.load_data(cfg, ["custom"], LEMMATIZE, REMOVE_COND, text=text, bpmn_xml=bpmn_xml)
     data = data_dict["custom"]
