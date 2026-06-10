@@ -77,13 +77,13 @@ def model2text_similarity(sim_matrix, ground_truth, threshold):
     return round(jaccard_index,2),round(f1,2)
 
 
-def best_of_tuple_similarity(sim_matrix, groups, ground_truth, threshold):
+def best_of_tuple_eval(sim_matrix, groups, ground_truth, threshold):
     num_sentences = ground_truth.shape[0]
     num_tasks = ground_truth.shape[1]
 
     best_indices = get_chronological_max_indices(sim_matrix, threshold)
 
-    # dissolve tuple matches back into individual sentence-task pairs
+    # dissolve tuple matches (tasks) back into individual sentence-task pairs
     dissolved = np.zeros((num_sentences, num_tasks), dtype=float)
     for group_col, best_row in enumerate(best_indices):
         if best_row != -1:
@@ -93,13 +93,13 @@ def best_of_tuple_similarity(sim_matrix, groups, ground_truth, threshold):
     return model2text_similarity(dissolved, ground_truth, threshold=0.5)
 
 
-def tuple_similarity(sim_matrix, sentence_ranges, task_ranges, ground_truth, threshold):
+def tuple_eval(sim_matrix, sentence_ranges, task_ranges, ground_truth, threshold):
     num_sentences = ground_truth.shape[0]
     num_tasks = ground_truth.shape[1]
 
     best_indices = get_chronological_max_indices(sim_matrix, threshold)
 
-    # dissolve tuple matches back into individual sentence-task pairs
+    # dissolve tuple matches (sentences and tasks) back into individual sentence-task pairs
     dissolved = np.zeros((num_sentences, num_tasks), dtype=float)
     for task_tuple_col, best_sent_tuple_row in enumerate(best_indices):
         if best_sent_tuple_row != -1:
@@ -112,7 +112,7 @@ def tuple_similarity(sim_matrix, sentence_ranges, task_ranges, ground_truth, thr
     return model2text_similarity(dissolved, ground_truth, threshold=0.5)
 
 
-def consensus_similarity(consensus_sim, ground_truth, threshold):
+def consensus_eval(consensus_sim, ground_truth, threshold):
     return model2text_similarity(consensus_sim, ground_truth, threshold)
 
 
@@ -156,9 +156,9 @@ def benchmark_runtime(text, bpmn_xml):
         body = {
             "similarity_panel": True,
             "text": text,
-            "bpmn_xml": bpmn_xml,
+            "bpmn_xml":bpmn_xml,
             "approach": "model2text",
-            "methods": [cfg],
+            "methods":[cfg],
         }
         
         total_time = 0
@@ -454,11 +454,10 @@ if __name__ == "__main__":
    
     LEMMATIZE = False
     REMOVE_COND = False
-    STRATEGY = 1  # 1: F1-Gap, 2: Diagonal GT, 3: Generated GT
+    STRATEGY = 1 
 
-    # Choose embedding method ("bert", "gemini", "llm2vec") or set to None for traditional
     EMBEDDING_METHOD   = "bert"
-    METRIC             = "cos"   # only used for embedding methods
+    METRIC             = "cos"  
     TRADITIONAL_METHOD = None # only used if EMBEDDING_METHOD is None
 
     # Consensus parameters
@@ -486,7 +485,6 @@ if __name__ == "__main__":
     for doc_id in model_ids:
         print(f"Evaluating Model {doc_id} with method '{method_label}'")
 
-        # Load data and compute similarity matrix (shared by most evaluations)
         data_dict  = ts.load_data(current_cfg, [doc_id], LEMMATIZE, REMOVE_COND)
         data       = data_dict[doc_id]
         sim_matrix = ts.get_sim_matrix(data, current_cfg)
@@ -510,7 +508,7 @@ if __name__ == "__main__":
         # Best-Of-Tuple Matching ___
         if RUN_BEST_OF_TUPLE:
             sim_best, groups = fda.best_of_tuple_matching(data, current_cfg)
-            jaccard_bot, f1_bot = best_of_tuple_similarity(sim_best, groups, gt_binary, best_t)
+            jaccard_bot, f1_bot = best_of_tuple_eval(sim_best, groups, gt_binary, best_t)
             print(f"Best-Of-Tuple Matching")
             print(f"  Jaccard Index: {jaccard_bot}")
             print(f"  GT-F1 Score:   {f1_bot}")
@@ -518,7 +516,7 @@ if __name__ == "__main__":
         # ______ 4. Tuple Matching ______
         if RUN_TUPLE:
             sim_tuple, s_tuples, t_tuples, s_ranges, t_ranges = fda.tuple_matching(data, current_cfg)
-            jaccard_tm, f1_tm = tuple_similarity(sim_tuple, s_ranges, t_ranges, gt_binary, best_t)
+            jaccard_tm, f1_tm = tuple_eval(sim_tuple, s_ranges, t_ranges, gt_binary, best_t)
             print(f"Tuple Matching")
             print(f"  Jaccard Index: {jaccard_tm}")
             print(f"  GT-F1 Score:   {f1_tm}")
@@ -531,7 +529,7 @@ if __name__ == "__main__":
             num_methods = len(CONSENSUS_METHODS)
             min_confidence = int(num_methods * 2 / 3)
             consensus_t = min_confidence / num_methods
-            jaccard_cm, f1_cm = consensus_similarity(consensus_sim, gt_binary, consensus_t)
+            jaccard_cm, f1_cm = consensus_eval(consensus_sim, gt_binary, consensus_t)
             print(f"Consensus Matching")
             print(f"  Methods:       {', '.join(method_labels)}")
             print(f"  Jaccard Index: {jaccard_cm}")

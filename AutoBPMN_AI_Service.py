@@ -8,18 +8,18 @@ import New_And_State_of_the_art_Embeddings as emb
 STRATEGY = 1  #default threshold strategy (Best performance in Evaluation)
 
 def process(body):
-    LEMMATIZE=False
-    REMOVE_COND=False
     similarity_panel=body.get("similarity_panel", False)
     text=body.get("text")
     bpmn_xml=body.get("bpmn_xml")
+    LEMMATIZE=body.get("lemmatize", False)
+    REMOVE_COND=body.get("remove_cond", False)
     
     if text is None or bpmn_xml is None:
         raise ValueError("'text' and 'bpmn_xml' must be provided in the request body")
 
     #If similarity_panel is False, skip all approaches and return only the match-based F1
     if not similarity_panel:
-        return compute_basic_f1(text, bpmn_xml, LEMMATIZE, REMOVE_COND)
+        return compute_basic_f1(text, bpmn_xml)
 
     approach = body.get("approach", "model2text")
     methods = body.get("methods", [])
@@ -92,12 +92,14 @@ def process(body):
     return results
 
 
-def compute_basic_f1(text, bpmn_xml, lemmatize, remove_cond):
+def compute_basic_f1(text, bpmn_xml):
+    LEMMATIZE=True #set permantly  ###############################
+    REMOVE_COND=True#set permantly ##################################
     cfg = {"embedding": "bert", "metric": "cos"}
-    data_dict = ts.load_data(cfg, ["custom"], lemmatize, remove_cond, text=text, bpmn_xml=bpmn_xml)
+    data_dict = ts.load_data(cfg, ["custom"], LEMMATIZE, REMOVE_COND, text=text, bpmn_xml=bpmn_xml)
     data = data_dict["custom"]
     sim = ts.get_sim_matrix(data, cfg)
-    threshold = ts.get_precomputed_threshold(cfg, strategy=STRATEGY, lemmatize=lemmatize, remove_cond=remove_cond)
+    threshold = ts.get_precomputed_threshold(cfg, strategy=STRATEGY, lemmatize=LEMMATIZE, remove_cond=REMOVE_COND)
     f1 = bg.compute_match_f1(sim, threshold)
     return {
         "f1": round(float(f1), 2),
@@ -121,7 +123,7 @@ def result(label, sim, threshold, sentences, tasks):
 
 
 if __name__ == "__main__":
-    TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
+    TEXT = "The customer places an order. We receive the order and process the payment. If you confirm the customer order, the goods are shipped to the customer."
     
     BPMN_XML = """<testset xmlns="http://cpee.org/ns/properties/2.0">
   <description>
@@ -151,14 +153,15 @@ if __name__ == "__main__":
 </testset>"""
  
     request_body = {
-        "similarity_panel": True,
+        "similarity_panel": False,
         "text": TEXT,
         "bpmn_xml": BPMN_XML,
-        "approach": "consensus",
+        "approach": "model2text",
         "methods": [
             {"embedding": "bert", "metric": "cos"},
-            {"traditional": "levenshtein"}
-        ]
+        ],
+        "lemmatize": True,
+        "remove_cond": True,
            
     }
     
