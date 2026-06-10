@@ -161,6 +161,9 @@ def benchmark_runtime(text, bpmn_xml):
             "methods":[cfg],
         }
         
+        # Warm-up run to load models into cache and avoid I/O overhead
+        AutoBPMN.process(body)
+
         total_time = 0
         for _ in range(RUNS):
             start = time.perf_counter()
@@ -200,6 +203,9 @@ def benchmark_runtime(text, bpmn_xml):
                 "methods": [{"embedding": "gemini", "metric": "cos"}],
             }
             label = "GEMINI+COS"
+            
+        # Warm-up run to load models into cache and avoid I/O overhead
+        AutoBPMN.process(body)
             
         total_time = 0
         for _ in range(RUNS):
@@ -470,71 +476,71 @@ if __name__ == "__main__":
     RUN_MODEL2TEXT = False
     RUN_BEST_OF_TUPLE = False
     RUN_TUPLE = False
-    RUN_CONSENSUS = True
-    RUN_BENCHMARK = False
+    RUN_CONSENSUS = False
+    RUN_BENCHMARK = True
   
+    if not RUN_BENCHMARK:
+        
+        # build method config
+        if EMBEDDING_METHOD is not None:
+            method_label = f"{EMBEDDING_METHOD.upper()} + {METRIC.upper()}"
+            current_cfg  = {"embedding": EMBEDDING_METHOD, "metric": METRIC}
+        else:
+            method_label = TRADITIONAL_METHOD.upper()
+            current_cfg  = {"traditional": TRADITIONAL_METHOD}
 
-    # build method config
-    if EMBEDDING_METHOD is not None:
-        method_label = f"{EMBEDDING_METHOD.upper()} + {METRIC.upper()}"
-        current_cfg  = {"embedding": EMBEDDING_METHOD, "metric": METRIC}
-    else:
-        method_label = TRADITIONAL_METHOD.upper()
-        current_cfg  = {"traditional": TRADITIONAL_METHOD}
+        for doc_id in model_ids:
+            print(f"Evaluating Model {doc_id} with method '{method_label}'")
 
-    for doc_id in model_ids:
-        print(f"Evaluating Model {doc_id} with method '{method_label}'")
+            data_dict  = ts.load_data(current_cfg, [doc_id], LEMMATIZE, REMOVE_COND)
+            data       = data_dict[doc_id]
+            sim_matrix = ts.get_sim_matrix(data, current_cfg)
+            gt_binary  = Datasets.get_ground_truth(doc_id)
+            best_t     = ts.get_precomputed_threshold(current_cfg, STRATEGY, LEMMATIZE, REMOVE_COND)
 
-        data_dict  = ts.load_data(current_cfg, [doc_id], LEMMATIZE, REMOVE_COND)
-        data       = data_dict[doc_id]
-        sim_matrix = ts.get_sim_matrix(data, current_cfg)
-        gt_binary  = Datasets.get_ground_truth(doc_id)
-        best_t     = ts.get_precomputed_threshold(current_cfg, STRATEGY, LEMMATIZE, REMOVE_COND)
+            # text Similarity _____
+            if RUN_TEXT_SIM:
+                cor, p = text_similarity(sim_matrix, get_gen_GT(doc_id))
+                print(f"Text Similarity")
+                print(f"  Spearman Correlation: {cor}")
+                print(f"  p-value:              {p}")
 
-        # text Similarity _____
-        if RUN_TEXT_SIM:
-            cor, p = text_similarity(sim_matrix, get_gen_GT(doc_id))
-            print(f"Text Similarity")
-            print(f"  Spearman Correlation: {cor}")
-            print(f"  p-value:              {p}")
+            # _noraml Model2Text Similarity___
+            if RUN_MODEL2TEXT:
+                jaccard, f1 = model2text_similarity(sim_matrix, gt_binary, best_t)
+                print(f"Model2Text Similarity")
+                print(f"  Jaccard Index: {jaccard}")
+                print(f"  GT-F1 Score:   {f1}")
 
-        # _noraml Model2Text Similarity___
-        if RUN_MODEL2TEXT:
-            jaccard, f1 = model2text_similarity(sim_matrix, gt_binary, best_t)
-            print(f"Model2Text Similarity")
-            print(f"  Jaccard Index: {jaccard}")
-            print(f"  GT-F1 Score:   {f1}")
+            # Best-Of-Tuple Matching ___
+            if RUN_BEST_OF_TUPLE:
+                sim_best, groups = fda.best_of_tuple_matching(data, current_cfg)
+                jaccard_bot, f1_bot = best_of_tuple_eval(sim_best, groups, gt_binary, best_t)
+                print(f"Best-Of-Tuple Matching")
+                print(f"  Jaccard Index: {jaccard_bot}")
+                print(f"  GT-F1 Score:   {f1_bot}")
 
-        # Best-Of-Tuple Matching ___
-        if RUN_BEST_OF_TUPLE:
-            sim_best, groups = fda.best_of_tuple_matching(data, current_cfg)
-            jaccard_bot, f1_bot = best_of_tuple_eval(sim_best, groups, gt_binary, best_t)
-            print(f"Best-Of-Tuple Matching")
-            print(f"  Jaccard Index: {jaccard_bot}")
-            print(f"  GT-F1 Score:   {f1_bot}")
+            # ______ 4. Tuple Matching ______
+            if RUN_TUPLE:
+                sim_tuple, s_tuples, t_tuples, s_ranges, t_ranges = fda.tuple_matching(data, current_cfg)
+                jaccard_tm, f1_tm = tuple_eval(sim_tuple, s_ranges, t_ranges, gt_binary, best_t)
+                print(f"Tuple Matching")
+                print(f"  Jaccard Index: {jaccard_tm}")
+                print(f"  GT-F1 Score:   {f1_tm}")
 
-        # ______ 4. Tuple Matching ______
-        if RUN_TUPLE:
-            sim_tuple, s_tuples, t_tuples, s_ranges, t_ranges = fda.tuple_matching(data, current_cfg)
-            jaccard_tm, f1_tm = tuple_eval(sim_tuple, s_ranges, t_ranges, gt_binary, best_t)
-            print(f"Tuple Matching")
-            print(f"  Jaccard Index: {jaccard_tm}")
-            print(f"  GT-F1 Score:   {f1_tm}")
-
-        # Consensus Matching ______
-        if RUN_CONSENSUS:
-            consensus_sim, sentences, tasks, match_f1, method_labels = fda.consensus_matching(
-                doc_id, CONSENSUS_METHODS, strategy=STRATEGY, lemmatize=LEMMATIZE, remove_cond=REMOVE_COND
-            )
-            num_methods = len(CONSENSUS_METHODS)
-            min_confidence = int(num_methods * 2 / 3)
-            consensus_t = min_confidence / num_methods
-            jaccard_cm, f1_cm = consensus_eval(consensus_sim, gt_binary, consensus_t)
-            print(f"Consensus Matching")
-            print(f"  Methods:       {', '.join(method_labels)}")
-            print(f"  Jaccard Index: {jaccard_cm}")
-            print(f"  GT-F1 Score:   {f1_cm}")
-
+            # Consensus Matching ______
+            if RUN_CONSENSUS:
+                consensus_sim, sentences, tasks, match_f1, method_labels = fda.consensus_matching(
+                    doc_id, CONSENSUS_METHODS, strategy=STRATEGY, lemmatize=LEMMATIZE, remove_cond=REMOVE_COND
+                )
+                num_methods = len(CONSENSUS_METHODS)
+                min_confidence = int(num_methods * 2 / 3)
+                consensus_t = min_confidence / num_methods
+                jaccard_cm, f1_cm = consensus_eval(consensus_sim, gt_binary, consensus_t)
+                print(f"Consensus Matching")
+                print(f"  Methods:       {', '.join(method_labels)}")
+                print(f"  Jaccard Index: {jaccard_cm}")
+                print(f"  GT-F1 Score:   {f1_cm}")
     # _____Benchmark 
     if RUN_BENCHMARK:
         TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
@@ -565,6 +571,6 @@ if __name__ == "__main__":
   </description>
 </testset>"""
         print(f"\n{'='*70}")
-        print("Running Benchmark")
+        print("Benchmark")
         print(f"{'='*70}")
         benchmark_runtime(TEXT, BPMN_XML)

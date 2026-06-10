@@ -44,7 +44,9 @@ def get_bert_embeddings(doc_ids=None, lemmatize_data=False, remove_conditions=Fa
         if len(data) ==len(doc_ids):
              return data
     #print("Computing BERT embeddings")
-    st_model = SentenceTransformer('stsb-roberta-large')
+    if "bert" not in cached_models:
+        cached_models["bert"] = SentenceTransformer('stsb-roberta-large')
+    st_model = cached_models["bert"]
     data = {}
     for doc_id in doc_ids:
         tasks, sentences = Datasets.get_data(doc_id=doc_id, text=text, bpmn_xml=bpmn_xml, lemmatized=lemmatize_data, remove_conditions=remove_conditions)
@@ -78,13 +80,15 @@ def get_llm2vec_embeddings(doc_ids=None, lemmatize_data=False, remove_conditions
         if len(data) == len(doc_ids): 
             return data
     #print(f"Computing LLM2Vec embeddings for models: {doc_ids}")
-    from llm2vec import LLM2Vec    
-    l2v = LLM2Vec.from_pretrained(
-        "McGill-NLP/LLM2Vec-Sheared-LLaMA-mntp",
-        peft_model_name_or_path="McGill-NLP/LLM2Vec-Sheared-LLaMA-mntp-supervised",
-        device_map="cuda" if torch.cuda.is_available() else "cpu",
-        torch_dtype=torch.bfloat16,
-    )
+    if "llm2vec" not in cached_models:
+        from llm2vec import LLM2Vec    
+        cached_models["llm2vec"] = LLM2Vec.from_pretrained(
+            "McGill-NLP/LLM2Vec-Sheared-LLaMA-mntp",
+            peft_model_name_or_path="McGill-NLP/LLM2Vec-Sheared-LLaMA-mntp-supervised",
+            device_map="cuda" if torch.cuda.is_available() else "cpu",
+            torch_dtype=torch.bfloat16,
+        )
+    l2v = cached_models["llm2vec"]
 
     data = {}
     for doc_id in doc_ids:
