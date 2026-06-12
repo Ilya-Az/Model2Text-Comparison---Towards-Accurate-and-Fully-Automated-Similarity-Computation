@@ -109,13 +109,15 @@ def compute_basic_f1(text, bpmn_xml):
 
 def result(label, sim, threshold, sentences, tasks):
     f1 = bg.compute_match_f1(sim, threshold)
+    matched = bg.get_chronological_max_indices(sim, threshold)
     return {
         "label": label,
         "sim_matrix": sim.tolist(), 
         "f1": round(float(f1), 2),
         "threshold": round(float(threshold), 2),
         "sentences": sentences,
-        "tasks": tasks
+        "tasks": tasks,
+        "matched_indices": matched.tolist()
     }
 
 
