@@ -15,4 +15,6 @@ def analyze():
 
 
 if __name__ == "__main__":
+    import New_And_State_of_the_art_Embeddings as emb
+    emb.preload_models()
     app.run(debug=True, host="0.0.0.0", port=5001)

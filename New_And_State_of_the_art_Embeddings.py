@@ -26,6 +26,23 @@ logging.getLogger("transformers").setLevel(logging.ERROR)
 # cache for models used by raw_texts encoding (loaded once, reused across calls)
 cached_models = {}
 
+def preload_models():
+    if "bert" not in cached_models:
+        cached_models["bert"] = SentenceTransformer('stsb-roberta-large')
+    if "llm2vec" not in cached_models:
+        from llm2vec import LLM2Vec
+        cached_models["llm2vec"] = LLM2Vec.from_pretrained(
+            "McGill-NLP/LLM2Vec-Sheared-LLaMA-mntp",
+            peft_model_name_or_path="McGill-NLP/LLM2Vec-Sheared-LLaMA-mntp-supervised",
+            device_map="cuda" if torch.cuda.is_available() else "cpu",
+            torch_dtype=torch.bfloat16,
+        )
+    if "gemini" not in cached_models:
+        load_dotenv()
+        api_key = os.getenv("GEMINI_API_KEY")
+        if api_key:
+            cached_models["gemini"] = genai.Client(api_key=api_key)
+
 def get_bert_embeddings(doc_ids=None, lemmatize_data=False, remove_conditions=False, load_stored=True, text=None, bpmn_xml=None, raw_texts=None): # https://huggingface.co/sentence-transformers/stsb-roberta-large
     #if raw_texts is provided, encode them directly and return embeddings (used by Tuple/Best-Of-Tuple Matching)
     if raw_texts is not None:
