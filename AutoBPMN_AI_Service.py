@@ -125,7 +125,7 @@ def result(label, sim, threshold, sentences, tasks):
 
 
 if __name__ == "__main__":
-    TEXT = "The customer places an order. We receive the order and process the payment. If you confirm the customer order, the goods are shipped to the customer."
+    TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
     
     BPMN_XML = """<testset xmlns="http://cpee.org/ns/properties/2.0">
   <description>
@@ -160,7 +160,7 @@ if __name__ == "__main__":
         "bpmn_xml": BPMN_XML,
         "approach": "model2text",
         "methods": [
-            {"embedding": "bert", "metric": "cos"},
+            {"traditional": "levenstein"},
         ],
         "lemmatize": True,
         "remove_cond": True,

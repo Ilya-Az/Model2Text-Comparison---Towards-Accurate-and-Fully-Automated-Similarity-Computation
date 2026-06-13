@@ -25,7 +25,6 @@ LEMMATIZE = False
 REMOVE_COND=False    
 
 #either embedding or traditional
-
 METHOD_CONFIG = {"embedding": "gemini", "metric": "cos"}
 #METHOD_CONFIG = {"traditional": "levenshtein"}
 
@@ -34,7 +33,7 @@ METHOD_CONFIG = {"embedding": "gemini", "metric": "cos"}
 # Show Score vs Threshold  curves
 SHOW_CURVES= False
 
-# Show validation heatmaps 
+#Show validation heatmaps 
 SHOW_HEATMAPS=  True
 
 # Rank all methods
@@ -612,8 +611,8 @@ def draw_single_strategy2_heatmap(ax, similarity, sentences, tasks, threshold, t
             expected_row = get_asymmetric_diagonal_row(col_index, num_rows, num_cols)
 
             if val >= threshold - 1e-5:
-                # TP (Green): Match is >= Threshold and inside the GT band (distance <= variance)
-                # FP (Red): Match is >=Threshold but outside the GT band
+                # TP (Green) match is >= Threshold and inside the GT band (distance <= variance)
+                # FP (Red) match is >=Threshold but outside the GT band
                 color = 'green' if abs(row_index - expected_row) <= gt_variance else 'red'
                 ax.add_patch(plt.Rectangle((col_index, row_index), 1, 1, fill=False, edgecolor=color, lw=2))
 
@@ -693,8 +692,8 @@ def draw_single_strategy3_heatmap(ax, similarity, ground_truth, sentences, tasks
 
             if val >= threshold - 1e-5:
                 is_gt = (ground_truth[row_index, col_index] == 1)
-                # TP (Green): Match is correct according to the GT
-                # FP (Red): Match is incorrect according to the GT
+                # TP (Green) Match is correct according to the GT
+                # FP (Red) Match is incorrect according to the GT
                 color = 'green' if is_gt else 'red'
                 ax.add_patch(plt.Rectangle((col_index, row_index), 1, 1,fill=False, edgecolor=color, lw=2))
 

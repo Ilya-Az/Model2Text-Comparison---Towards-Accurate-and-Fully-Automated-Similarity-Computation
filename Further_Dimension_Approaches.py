@@ -17,28 +17,24 @@ STRATEGY = 1  # 1: F1-Gap, 2: Diagonal GT, 3: Generated GT
 LEMMATIZE = False
 REMOVE_COND = False
 
-# either embedding or traditional
-#METHOD_CONFIG = {"embedding": "gemini", "metric": "cos"}
-METHOD_CONFIG = {"traditional": "levenshtein"}
 
-# Consensus Parameters: list of method configs (embedding and/or traditional)
+METHOD_CONFIG = {"embedding": "bert", "metric": "cos"}
+#{"traditional": "levenshtein"}
+
+
 CONSENSUS_METHODS = [
     # {"embedding":"bert", "metric":"cos"},
     {"traditional": "levenshtein"},
     {"embedding": "gemini", "metric": "cos"}
     
 ]
-
-# select which methods to run
 RUN_CONSENSUS = False
 RUN_TUPLE = False
 RUN_BEST_OF_TUPLE = True
 
-TEXT = None
-"The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
+TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
     
-BPMN_XML =  None
-"""<testset xmlns="http://cpee.org/ns/properties/2.0">
+BPMN_XML = """<testset xmlns="http://cpee.org/ns/properties/2.0">
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">
       <call id="a1" endpoint="auto">
@@ -268,7 +264,6 @@ def tuple_matching(data, method_config):
 
 
 def visualize_tuple_heatmap(doc_id, sim_matrix, sentence_ranges, task_ranges, sentences, tasks, method_config, STRATEGY,LEMMATIZE, REMOVE_COND, title_suffix=""):
-    # labels with custom task labels: e.g. "T1: ... . T2: ..."
     col_labels=[]
     for t_range in task_ranges:
         temp_t=[]
@@ -452,7 +447,6 @@ if __name__ == "__main__":
 
     method_cfg = METHOD_CONFIG
 
-    # 1. TEST CONSENSUS MATCHING
     if RUN_CONSENSUS:
         print(f"Consensus Matching for Model {DOC_ID}___")
         consensus_sim, sentences, tasks, f1, method_labels = consensus_matching(
@@ -463,12 +457,9 @@ if __name__ == "__main__":
             DOC_ID, method_labels, sentences, tasks, consensus_sim, f1
         )
       
-    # load data for the following methods
     if RUN_TUPLE or RUN_BEST_OF_TUPLE:
         data_dict = ts.load_data(method_cfg, [DOC_ID], LEMMATIZE, REMOVE_COND, text=TEXT, bpmn_xml=BPMN_XML)
         data = data_dict[DOC_ID]
-
-    # 2. TEST TUPLE MATCHING
     if RUN_TUPLE:
         print(f"Tuple Matching (size=2) for Model {DOC_ID}____")
         sim_tuple, s_tuples, t_tuples, s_ranges, t_ranges = tuple_matching(
@@ -479,7 +470,6 @@ if __name__ == "__main__":
             STRATEGY=STRATEGY, LEMMATIZE=LEMMATIZE, REMOVE_COND=REMOVE_COND
         )
 
-    # 3. TEST BEST-OF-TUPLE MATCHING
     if RUN_BEST_OF_TUPLE:
         print(f"Best-Of-Tuple Matching for Model {DOC_ID}____")
         sim_best, combo_src = best_of_tuple_matching(data, method_cfg)

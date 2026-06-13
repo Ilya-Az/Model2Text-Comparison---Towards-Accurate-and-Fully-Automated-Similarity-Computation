@@ -375,11 +375,12 @@ if __name__ == "__main__":
   </description>
 </testset>"""
 
-    """
+    
     tasks, sentences = Datasets.get_data(doc_id=DOC_ID, text=TEXT, bpmn_xml=BPMN_XML,
                                           lemmatized=LEMMATIZE, remove_conditions=REMOVE_COND)
     sim_matrix = compute_similarity_matrix(METHOD, sentences, tasks)
     threshold = get_threshold(METHOD, strategy=STRATEGY, lemmatize=LEMMATIZE, remove_cond=REMOVE_COND)
+    print(threshold)
     print("threshold = " + str(threshold))
     plot_basic_heatmap(sim_matrix, sentences, tasks, threshold, title=f"Heatmap ({METHOD.upper()})")
     
@@ -394,5 +395,5 @@ if __name__ == "__main__":
     sim_matrix = compute_similarity_matrix(METHOD, data[DOC_ID[0]]["sentences"], data[DOC_ID[0]]["tasks"])
     threshold = get_threshold(METHOD, strategy=STRATEGY, lemmatize=LEMMATIZE, remove_cond=REMOVE_COND)
     plot_basic_heatmap(sim_matrix, data[DOC_ID[0]]["sentences"], data[DOC_ID[0]]["tasks"], threshold, title=f"Heatmap ({METHOD.upper()})")
-
+"""
     
