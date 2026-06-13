@@ -155,15 +155,15 @@ if __name__ == "__main__":
 </testset>"""
  
     request_body = {
-        "similarity_panel": False,
+        "similarity_panel": True,
         "text": TEXT,
         "bpmn_xml": BPMN_XML,
         "approach": "model2text",
         "methods": [
-            {"traditional": "levenstein"},
+            {"traditional": "word2vec"},
         ],
-        "lemmatize": True,
-        "remove_cond": True,
+        "lemmatize": False,
+        "remove_cond": False,
            
     }
     

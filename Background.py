@@ -340,7 +340,7 @@ if __name__ == "__main__":
     import Datasets
     
     DOC_ID = "21"
-    METHOD = "levenshtein"
+    METHOD = "word2vec"
     STRATEGY = 1
     LEMMATIZE = False
     REMOVE_COND = False

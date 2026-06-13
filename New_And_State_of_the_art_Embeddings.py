@@ -299,14 +299,12 @@ if __name__ == "__main__":
     LEMMATIZE_DATA = False
     REMOVE_CONDITIONS = False
     
-    EMBEDDING_METHOD = "bert"
-    METRIC = "cos"
+    EMBEDDING_METHOD = "llm2vec"
+    METRIC = "man"
 
-    TEXT = None 
-    "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
+    TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
     
-    BPMN_XML = None
-    """<testset xmlns="http://cpee.org/ns/properties/2.0">
+    BPMN_XML =  """<testset xmlns="http://cpee.org/ns/properties/2.0">
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">
       <call id="a1" endpoint="auto">
@@ -359,10 +357,10 @@ if __name__ == "__main__":
         #plot_similarity_heatmap(data_l2v, "llm2vec", METRIC, title_prefix=f"LLM2Vec embeddings + {METRIC}")
         if data_l2v:
             first_doc_id = list(data_l2v.keys())[0]
-            #sim_matrix = compute_similarity_matrix(METRIC, data_l2v[first_doc_id]["emb_sentences"], data_l2v[first_doc_id]["emb_tasks"])
-            #threshold = get_threshold("llm2vec", METRIC, strategy=1,lemmatize=LEMMATIZE_DATA, remove_cond=REMOVE_CONDITIONS)
-            #plot_basic_heatmap(sim_matrix, data_l2v[first_doc_id]["sentences"], data_l2v[first_doc_id]["tasks"], threshold, f"LLM2Vec Embeddings + {METRIC} - Doc: {first_doc_id}")
-            plot_similarity_heatmap(data_l2v, "llm2vec", METRIC, title_prefix=f"LLM2Vec Embeddings + {METRIC.upper()}")
+            sim_matrix = compute_similarity_matrix(METRIC, data_l2v[first_doc_id]["emb_sentences"], data_l2v[first_doc_id]["emb_tasks"])
+            threshold = get_threshold("llm2vec", METRIC, strategy=1,lemmatize=LEMMATIZE_DATA, remove_cond=REMOVE_CONDITIONS)
+            plot_basic_heatmap(sim_matrix, data_l2v[first_doc_id]["sentences"], data_l2v[first_doc_id]["tasks"], threshold, f"LLM2Vec Embeddings + {METRIC} - Doc: {first_doc_id}")
+            #plot_similarity_heatmap(data_l2v, "llm2vec", METRIC, title_prefix=f"LLM2Vec Embeddings + {METRIC.upper()}")
 
 
 
