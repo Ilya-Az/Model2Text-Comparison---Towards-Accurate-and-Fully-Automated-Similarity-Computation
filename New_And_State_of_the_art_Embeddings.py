@@ -23,7 +23,6 @@ warnings.filterwarnings("ignore", category=UserWarning, module="peft")
 #suppress tokenizer message from transformers
 logging.getLogger("transformers").setLevel(logging.ERROR)
 
-# cache for models used by raw_texts encoding (loaded once, reused across calls)
 cached_models = {}
 
 def preload_models():
