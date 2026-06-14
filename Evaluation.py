@@ -191,18 +191,18 @@ def benchmark_runtime(text, bpmn_xml):
                     "text": text,
                     "bpmn_xml": bpmn_xml,
                     "approach": "consensus",
-                    "methods": [{"traditional": "jaccard"},{"embedding": "gemini", "metric": "cos"}],
+                    "methods": [{"traditional": "jaccard"},{"traditional": "levenshtein"}],
                 }
-            label = "JACCARD + GEMINI+COS"
+            label = "JACCARD + LEVENSHTEIN"
         else:
             body = {
                 "similarity_panel": True,
                 "text": text,
                 "bpmn_xml": bpmn_xml,
                 "approach": approach,
-                "methods": [{"embedding": "gemini", "metric": "cos"}],
+                "methods": [{"traditional": "jaccard"}],
             }
-            label = "GEMINI+COS"
+            label = "JACCARD"
             
        #preload models
         #AutoBPMN.process(body)
