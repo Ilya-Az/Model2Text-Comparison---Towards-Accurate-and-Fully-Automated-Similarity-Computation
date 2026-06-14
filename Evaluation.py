@@ -161,8 +161,8 @@ def benchmark_runtime(text, bpmn_xml):
             "methods":[cfg],
         }
         
-        # Warm-up run to load models into cache and avoid I/O overhead
-        AutoBPMN.process(body)
+        #preload models
+        #AutoBPMN.process(body)
 
         total_time = 0
         for _ in range(RUNS):
@@ -204,8 +204,8 @@ def benchmark_runtime(text, bpmn_xml):
             }
             label = "GEMINI+COS"
             
-        # Warm-up run to load models into cache and avoid I/O overhead
-        AutoBPMN.process(body)
+       #preload models
+        #AutoBPMN.process(body)
             
         total_time = 0
         for _ in range(RUNS):
