@@ -139,15 +139,14 @@ APPROACHES = ["tuple", "best_of_tuple", "consensus"]
 
 ```
 ├── Datasets Folder   # stores the Datasets of the PMo Dataset which is used in this work
-├── embedding Folder   # stores the precomputed embeddings for the Datasets
-├── datasets.py     # Task & sentence extraction, lemmatization, RCE, GT data
-├── background.py      # Traditional similarity methods & Match-based F1
-├── new_and_state_of_the_art.py  # BERT, LLM2Vec, Gemini Embeddings
-├── threshold_strategies.py   # Three threshold optimization strategies
-├── further_dimension.py   # Tuple Matching, Best-Of-Tuple, Consensus Matching
-├── autobpmn_ai_service.py   # Facade layer for AutoBPMN.AI
-├── api.py        # Flask REST API
-├── evaluation.py      # Spearman correlation, Jaccard Index, GT-F1 evaluation
-├── .env          # Gemini API key (not tracked by git)
-└── README.md
+├── Embedding Folder   # stores the precomputed embeddings for the Datasets
+├── Datasets.py     # Task & sentence extraction, lemmatization, RCE, GT data
+├── Background.py      # Traditional similarity methods & Match-based F1
+├── New_And_State_Of_The_Art.py  # BERT, LLM2Vec, Gemini Embeddings
+├── Threshold_Strategies.py   # Three threshold optimization strategies
+├── Further_Dimension.py   # Tuple Matching, Best-Of-Tuple, Consensus Matching
+├── Autobpmn_ai_service.py   # Facade layer for AutoBPMN.AI
+├── API.py        # Flask REST API
+├── Evaluation.py      # Spearman correlation, Jaccard Index, GT-F1 evaluation
+└── .env          # Gemini API key (not tracked by git)
 ```
