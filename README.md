@@ -99,6 +99,7 @@ List of Further Dimension Approaches for Input in JSON body
    APPROACHES = ["tuple", "best_of_tuple", "consensus"]
 
 Project Structure
+
 ├── Datasets Folder    # stores the Datasets of the PMo Dataset which is used in this work
 
 ├── embedding Folder   #stores the precomputed embeddings for the Datasets
@@ -116,8 +117,11 @@ Project Structure
 ├── autobpmn_ai_service.py       # Facade layer for AutoBPMN.AI
 
 ├── api.py                 # Flask REST API
+
 ├── evaluation.py             # Spearman correlation, Jaccard Index, GT-F1 evaluation
+
 ├── .env                     # Gemini API key (not tracked by git)
+
 └── README.md
 
 
