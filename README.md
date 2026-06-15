@@ -104,21 +104,21 @@ Project Structure
 
 ├── embedding Folder   #stores the precomputed embeddings for the Datasets
 
-├── datasets.py             # Task & sentence extraction, lemmatization, RCE, GT data
+├── Datasets.py             # Task & sentence extraction, lemmatization, RCE, GT data
 
-├── background.py           # Traditional similarity methods & Match-based F1
+├── Background.py           # Traditional similarity methods & Match-based F1
 
-├── new_and_state_of_the_art.py  # BERT, LLM2Vec, Gemini Embeddings
+├── New_and_state_of_the_art.py  # BERT, LLM2Vec, Gemini Embeddings
 
-├── threshold_strategies.py      # Three threshold optimization strategies
+├── Threshold_strategies.py      # Three threshold optimization strategies
 
-├── further_dimension.py         # Tuple Matching, Best-Of-Tuple, Consensus Matching
+├── Further_dimension.py         # Tuple Matching, Best-Of-Tuple, Consensus Matching
 
-├── autobpmn_ai_service.py       # Facade layer for AutoBPMN.AI
+├── AutoBPMN_AI_service.py       # Facade layer for AutoBPMN.AI
 
-├── api.py                 # Flask REST API
+├── Api.py                 # Flask REST API
 
-├── evaluation.py             # Spearman correlation, Jaccard Index, GT-F1 evaluation
+├── Evaluation.py             # Spearman correlation, Jaccard Index, GT-F1 evaluation
 
 ├── .env                     # Gemini API key (not tracked by git)
 
