@@ -299,8 +299,8 @@ if __name__ == "__main__":
     LEMMATIZE_DATA = False
     REMOVE_CONDITIONS = False
     
-    EMBEDDING_METHOD = "llm2vec"
-    METRIC = "man"
+    EMBEDDING_METHOD = "bert"
+    METRIC = "cos"
 
     TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
     
