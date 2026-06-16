@@ -31,7 +31,7 @@ git clone https://github.com/Ilya-Az/Model2Text-Comparison---Towards-Accurate-an
 
 ### 2. Install dependencies
 
-```
+```bash
 pip install numpy scikit-learn matplotlib seaborn pandas
 pip install rapidfuzz nltk gensim spacy flask
 pip install sentence-transformers
@@ -41,7 +41,7 @@ pip install google-genai python-dotenv
 
 ### 3. Download the spaCy language model
 
-```
+```bash
 python3 -m spacy download en_core_web_sm
 ```
 
@@ -49,7 +49,7 @@ python3 -m spacy download en_core_web_sm
 
 Run the following once in a Python Terminal or Script before first use:
 
-```
+```bash
 import nltk
 nltk.download('wordnet')
 nltk.download('punkt')
@@ -71,7 +71,7 @@ The .env file is listed in .gitignore and will not be pushed to GitHub.
 
 ### Run the API server
 
-```
+```bash
 python3 API.py
 ```
 
