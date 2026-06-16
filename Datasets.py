@@ -447,20 +447,7 @@ def get_ground_truth(doc_id):
     return GROUND_TRUTH.get(doc_id)
 
 if __name__ == "__main__":
-    """
-    doc_id = "01" 
-    print(f"Test Lemmatizer with Dataset {doc_id}")
-    
-    print("\n1. Without Condition-Removal:")
-    tasks, sentences = load_dataset(doc_id, lemmatized=False, remove_conditions=False)
-    for s in sentences[:5]:
-        print(" -", s)
-        
-    print("\n2. With Condition-Removal")
-    tasks_rm, sentences_rm = load_dataset(doc_id, lemmatized=False, remove_conditions=True)
-    for s in sentences_rm[:5]:
-        print(" -", s)
-      """  
+   
     
     doc_id = "11"
     LEMMATIZE=True
@@ -470,7 +457,7 @@ if __name__ == "__main__":
     for i, s in enumerate(sentences, 1):
         print(f"Sentence {i}: {s}")
 
-    print(f"\ntasks({len(tasks)}):")
+    print(f"tasks({len(tasks)}):")
     for i, t in enumerate(tasks, 1):
         print(f"Task {i}: {t}")
     

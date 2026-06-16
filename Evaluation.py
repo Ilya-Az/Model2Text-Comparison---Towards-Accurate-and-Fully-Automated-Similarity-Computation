@@ -9,10 +9,7 @@ import AutoBPMN_AI_Service as AutoBPMN
 
 
 def text_similarity(sim_matrix, ground_truth):
-    
-    #calculates the Spearman Correlation between the clustered similarity scores (0-5)
-    #and the ground-truth scores (from gen_GTs, 0-5) for each sentence-task pair
-
+    #calculates the Spearman Correlation
     pairs = []
     sim = []
     gt = []
@@ -520,7 +517,7 @@ if __name__ == "__main__":
                 print(f"  Jaccard Index: {jaccard_bot}")
                 print(f"  GT-F1 Score:   {f1_bot}")
 
-            # ______ 4. Tuple Matching ______
+            # ______ Tuple Matching ______
             if RUN_TUPLE:
                 sim_tuple, s_tuples, t_tuples, s_ranges, t_ranges = fda.tuple_matching(data, current_cfg)
                 jaccard_tm, f1_tm = tuple_eval(sim_tuple, s_ranges, t_ranges, gt_binary, best_t)
