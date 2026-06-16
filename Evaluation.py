@@ -8,7 +8,7 @@ import time
 import AutoBPMN_AI_Service as AutoBPMN
 
 
-def text_similarity(sim_matrix, ground_truth):
+def text_similarity(sim_matrix, ground_truth, printing=True):
     #calculates the Spearman Correlation
     pairs = []
     sim = []
@@ -19,21 +19,209 @@ def text_similarity(sim_matrix, ground_truth):
             sim.append(sim_matrix[i, j])
             gt.append(ground_truth[i, j])
 
-    # Combine into a list of tuples for sorting and printing
-    data_points = list(zip(pairs, gt, sim))
-    # Sort by human rating (gt) descending
-    data_points.sort(key=lambda x: x[1], reverse=True)
+    if printing:
+        # Combine into a list of tuples for sorting and printing
+        data_points = list(zip(pairs, gt, sim))
+        # Sort by human rating (gt) descending
+        data_points.sort(key=lambda x: x[1], reverse=True)
 
-    print(f"\n{'Sentence-task pair':<15} | {'GT-rating (0-5)':<27} | {'Computed-Similarity':<17}")
-    print("-------------------------------------------------------------------------")
-           
-    for pair_name, gt_val, sim_val in data_points:
-        print(f"{pair_name:<18} | {gt_val:<27} | {sim_val:<17}")
+        print(f"\n{'Sentence-task pair':<15} | {'GT-rating (0-5)':<27} | {'Computed-Similarity':<17}")
+        print("-------------------------------------------------------------------------")
+               
+        for pair_name, gt_val, sim_val in data_points:
+            print(f"{pair_name:<18} | {gt_val:<27} | {sim_val:<17}")
+            
     sim=np.array(sim)
     gt=np.array(gt)
     
     correlation, p_value =spearmanr(sim,gt)
     return correlation,p_value
+
+def print_spearman_table(doc_ids):
+    ALL_METHODS = [
+        {"traditional": "levenshtein"},
+        {"traditional": "jaccard"},
+        {"traditional": "wordnet"},
+        {"traditional": "tfidf"},
+        {"traditional": "word2vec"},
+        {"embedding": "bert", "metric": "cos"},
+        {"embedding": "bert", "metric": "eu"},
+        {"embedding": "bert", "metric": "man"},
+        {"embedding": "gemini", "metric": "cos"},
+        {"embedding": "llm2vec", "metric": "cos"},
+        {"embedding": "llm2vec", "metric": "eu"},
+        {"embedding": "llm2vec", "metric": "man"},
+    ]
+
+    combinations = [
+        (False, False),
+        (True, False),
+        (False, True),
+        (True, True)
+    ]
+
+    print(f"\n{'Spearman Correlation Table for Docs: ' + ', '.join(doc_ids)}")
+    print("-" * 125)
+    print(f"{'Method':<25} | {'None (Lem=F, RCE=F)':<18} | {'Lem (Lem=T, RCE=F)':<18} | {'RCE (Lem=F, RCE=T)':<18} | {'Lem+RCE (Lem=T, RCE=T)':<18} | {'Row Average':<18}")
+    print("-" * 125)
+
+    col_sums = [0] * len(combinations)
+    col_counts = [0] * len(combinations)
+
+    for method in ALL_METHODS:
+        label = get_label(method)
+        row_str = f"{label:<25}"
+        
+        row_sum = 0
+        row_count = 0
+        
+        for col_idx, (lemmatize, remove_cond) in enumerate(combinations):
+            avg_corr = 0
+            docs = 0
+            
+            for doc_id in doc_ids:
+                data_dict = ts.load_data(method, [doc_id], lemmatize, remove_cond)
+                data = data_dict[doc_id]
+                sim_matrix = ts.get_sim_matrix(data, method)
+                ground_truth = get_gen_GT(doc_id)
+                
+                correlation, _ = text_similarity(sim_matrix, ground_truth, printing=False)
+                
+                avg_corr += correlation
+                docs += 1
+            
+            avg_corr /= docs
+            row_str += f" | {avg_corr:<18.2f}"
+            
+            row_sum += avg_corr
+            row_count += 1
+            
+            col_sums[col_idx] += avg_corr
+            col_counts[col_idx] += 1
+           
+                
+        row_avg = row_sum / row_count
+        row_str += f" | {row_avg:<18.2f}"
+        
+        print(row_str)
+        
+    print("-" * 125)
+    
+    col_str = f"{'Column Average':<25}"
+    total_sum = 0
+    total_count = 0
+    for s, c in zip(col_sums, col_counts):
+        c_avg = s / c if c > 0 else 0
+        col_str += f" | {c_avg:<18.2f}"
+        total_sum += c_avg
+        total_count += 1
+        
+    overall_avg = total_sum / total_count 
+    col_str += f" | {overall_avg:<18.2f}"
+    print(col_str)
+    print("-" * 125)
+
+def print_model2text_table(doc_ids, strategy=1):
+    import Datasets
+    ALL_METHODS = [
+        {"traditional": "levenshtein"},
+        {"traditional": "jaccard"},
+        {"traditional": "wordnet"},
+        {"traditional": "tfidf"},
+        {"traditional": "word2vec"},
+        {"embedding": "bert", "metric": "cos"},
+        {"embedding": "bert", "metric": "eu"},
+        {"embedding": "bert", "metric": "man"},
+        {"embedding": "gemini", "metric": "cos"},
+        {"embedding": "llm2vec", "metric": "cos"},
+        {"embedding": "llm2vec", "metric": "eu"},
+        {"embedding": "llm2vec", "metric": "man"},
+    ]
+
+    combinations = [
+        (False, False),
+        (True, False),
+        (False, True),
+        (True, True)
+    ]
+
+    print(f"\n{'Model2Text Jaccard / F1 Table for Docs: ' + ', '.join(doc_ids)}")
+    print("-" * 145)
+    print(f"{'Method':<25} | {'None (Lem=F, RCE=F)':<20} | {'Lem (Lem=T, RCE=F)':<20} | {'RCE (Lem=F, RCE=T)':<20} | {'Lem+RCE (Lem=T, RCE=T)':<20} | {'Row Average':<20}")
+    print("-" * 145)
+
+    col_sums_jac = [0] * len(combinations)
+    col_sums_f1 = [0] * len(combinations)
+    col_counts = [0] * len(combinations)
+
+    for method in ALL_METHODS:
+        label = get_label(method)
+        row_str = f"{label:<25}"
+        
+        row_sum_jac = 0
+        row_sum_f1 = 0
+        row_count = 0
+        
+        for col_idx, (lemmatize, remove_cond) in enumerate(combinations):
+            avg_jac = 0
+            avg_f1 = 0
+            docs = 0
+            
+            for doc_id in doc_ids:
+                data_dict = ts.load_data(method, [doc_id], lemmatize, remove_cond)
+                data = data_dict[doc_id]
+                sim_matrix = ts.get_sim_matrix(data, method)
+                ground_truth = Datasets.get_ground_truth(doc_id)
+                best_t = ts.get_precomputed_threshold(method, strategy, lemmatize, remove_cond)
+                
+                jaccard, f1 = model2text_similarity(sim_matrix, ground_truth, best_t)
+                
+                avg_jac += jaccard
+                avg_f1 += f1
+                docs += 1
+            
+            avg_jac /= docs
+            avg_f1 /= docs
+            val_str = f"{avg_jac:.2f} / {avg_f1:.2f}"
+            row_str += f" | {val_str:<20}"
+            
+            row_sum_jac += avg_jac
+            row_sum_f1 += avg_f1
+            row_count += 1
+            
+            col_sums_jac[col_idx] += avg_jac
+            col_sums_f1[col_idx] += avg_f1
+            col_counts[col_idx] += 1
+           
+                
+        row_avg_jac = row_sum_jac / row_count
+        row_avg_f1 = row_sum_f1 / row_count
+        avg_str = f"{row_avg_jac:.2f} / {row_avg_f1:.2f}"
+        row_str += f" | {avg_str:<20}"
+        
+        print(row_str)
+        
+    print("-" * 145)
+    
+    col_str = f"{'Column Average':<25}"
+    total_sum_jac = 0
+    total_sum_f1 = 0
+    total_count = 0
+    for s_jac, s_f1, c in zip(col_sums_jac, col_sums_f1, col_counts):
+        c_avg_jac = s_jac / c if c > 0 else 0
+        c_avg_f1 = s_f1 / c if c > 0 else 0
+        c_str = f"{c_avg_jac:.2f} / {c_avg_f1:.2f}"
+        col_str += f" | {c_str:<20}"
+        total_sum_jac += c_avg_jac
+        total_sum_f1 += c_avg_f1
+        total_count += 1
+        
+    overall_avg_jac = total_sum_jac / total_count 
+    overall_avg_f1 = total_sum_f1 / total_count 
+    o_str = f"{overall_avg_jac:.2f} / {overall_avg_f1:.2f}"
+    col_str += f" | {o_str:<20}"
+    print(col_str)
+    print("-" * 145)
 
 def model2text_similarity(sim_matrix, ground_truth, threshold):
     rows, cols = sim_matrix.shape
@@ -117,6 +305,9 @@ def get_label(cfg):
     if "embedding" in cfg:
         return f"{cfg['embedding'].upper()}+{cfg['metric'].upper()}"
     return cfg["traditional"].upper()
+
+
+
 
 
 def benchmark_runtime(text, bpmn_xml):
@@ -453,32 +644,39 @@ if __name__ == "__main__":
     import Further_Dimension_Approaches as fda
 
     # --- CONFIGURATION ---
-    model_ids = ["01"]
+    model_ids = ["01","02"]
    
     LEMMATIZE = False
     REMOVE_COND = False
     STRATEGY = 1 
 
-    EMBEDDING_METHOD   = "bert"
-    METRIC             = "cos"  
-    TRADITIONAL_METHOD = None # only used if EMBEDDING_METHOD is None
+    EMBEDDING_METHOD   = None #"bert"
+    METRIC             = None#"cos"  
+    TRADITIONAL_METHOD = "levenshtein" # only used if EMBEDDING_METHOD is None
 
-    # Consensus parameters
+    
     CONSENSUS_METHODS = [
         {"traditional": "levenshtein"},
         {"embedding": "bert", "metric": "cos"}
     ]
 
     RUN_TEXT_SIM  = False
-    RUN_MODEL2TEXT = False
+    RUN_SPEARMAN_TABLE = False
+    RUN_MODEL2TEXT = True
+    RUN_MODEL2TEXT_TABLE = False
     RUN_BEST_OF_TUPLE = False
     RUN_TUPLE = False
     RUN_CONSENSUS = False
-    RUN_BENCHMARK = True
+    RUN_BENCHMARK = False
   
-    if not RUN_BENCHMARK:
+
+    if RUN_SPEARMAN_TABLE:
+        print_spearman_table(model_ids)
         
-        # build method config
+    if RUN_MODEL2TEXT_TABLE:
+        print_model2text_table(model_ids, STRATEGY)
+  
+    if not RUN_BENCHMARK and not RUN_SPEARMAN_TABLE and not RUN_MODEL2TEXT_TABLE:
         if EMBEDDING_METHOD is not None:
             method_label = f"{EMBEDDING_METHOD.upper()} + {METRIC.upper()}"
             current_cfg  = {"embedding": EMBEDDING_METHOD, "metric": METRIC}
