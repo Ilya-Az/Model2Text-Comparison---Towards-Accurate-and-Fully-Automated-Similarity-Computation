@@ -68,13 +68,11 @@ def print_spearman_table(doc_ids):
     col_sums = [0] * len(combinations)
     col_counts = [0] * len(combinations)
 
+    rows = []
     for method in ALL_METHODS:
         label = get_label(method)
-        row_str = f"{label:<25}"
         
-        row_sum = 0
-        row_count = 0
-        
+        row_vals = []
         for col_idx, (lemmatize, remove_cond) in enumerate(combinations):
             avg_corr = 0
             docs = 0
@@ -91,18 +89,22 @@ def print_spearman_table(doc_ids):
                 docs += 1
             
             avg_corr /= docs
-            row_str += f" | {avg_corr:<18.2f}"
-            
-            row_sum += avg_corr
-            row_count += 1
+            row_vals.append(avg_corr)
             
             col_sums[col_idx] += avg_corr
             col_counts[col_idx] += 1
-           
                 
-        row_avg = row_sum / row_count
+        row_avg = sum(row_vals) / len(row_vals)
+        rows.append((label, row_vals, row_avg))
+
+    
+    rows.sort(key=lambda x: x[2], reverse=True)
+
+    for label, row_vals, row_avg in rows:
+        row_str = f"{label:<25}"
+        for val in row_vals:
+            row_str += f" | {val:<18.2f}"
         row_str += f" | {row_avg:<18.2f}"
-        
         print(row_str)
         
     print("-" * 125)
@@ -154,14 +156,11 @@ def print_model2text_table(doc_ids, strategy=1):
     col_sums_f1 = [0] * len(combinations)
     col_counts = [0] * len(combinations)
 
+    rows = []
     for method in ALL_METHODS:
         label = get_label(method)
-        row_str = f"{label:<25}"
         
-        row_sum_jac = 0
-        row_sum_f1 = 0
-        row_count = 0
-        
+        row_vals = []  #list of (jac, f1) per combination
         for col_idx, (lemmatize, remove_cond) in enumerate(combinations):
             avg_jac = 0
             avg_f1 = 0
@@ -182,23 +181,31 @@ def print_model2text_table(doc_ids, strategy=1):
             
             avg_jac /= docs
             avg_f1 /= docs
-            val_str = f"{avg_jac:.2f} / {avg_f1:.2f}"
-            row_str += f" | {val_str:<20}"
-            
-            row_sum_jac += avg_jac
-            row_sum_f1 += avg_f1
-            row_count += 1
+            row_vals.append((avg_jac, avg_f1))
             
             col_sums_jac[col_idx] += avg_jac
             col_sums_f1[col_idx] += avg_f1
             col_counts[col_idx] += 1
-           
                 
-        row_avg_jac = row_sum_jac / row_count
-        row_avg_f1 = row_sum_f1 / row_count
+        row_sum_jac = 0
+        row_sum_f1 = 0
+        for v in row_vals:
+            row_sum_jac += v[0]
+            row_sum_f1 += v[1]
+        row_avg_jac = row_sum_jac / len(row_vals)
+        row_avg_f1 = row_sum_f1 / len(row_vals)
+        rows.append((label, row_vals, row_avg_jac, row_avg_f1))
+
+   
+    rows.sort(key=lambda x: x[3], reverse=True)#sort according to f1
+
+    for label, row_vals, row_avg_jac, row_avg_f1 in rows:
+        row_str = f"{label:<25}"
+        for jac, f1 in row_vals:
+            val_str = f"{jac:.2f} / {f1:.2f}"
+            row_str += f" | {val_str:<20}"
         avg_str = f"{row_avg_jac:.2f} / {row_avg_f1:.2f}"
         row_str += f" | {avg_str:<20}"
-        
         print(row_str)
         
     print("-" * 145)
@@ -644,7 +651,7 @@ if __name__ == "__main__":
     import Further_Dimension_Approaches as fda
 
     # --- CONFIGURATION ---
-    model_ids = ["01","02"]
+    model_ids = ["01","02","03","04","05","06","07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"]
    
     LEMMATIZE = False
     REMOVE_COND = False
@@ -661,9 +668,9 @@ if __name__ == "__main__":
     ]
 
     RUN_TEXT_SIM  = False
-    RUN_SPEARMAN_TABLE = False
-    RUN_MODEL2TEXT = True
-    RUN_MODEL2TEXT_TABLE = False
+    RUN_SPEARMAN_TABLE = True
+    RUN_MODEL2TEXT = False
+    RUN_MODEL2TEXT_TABLE = True
     RUN_BEST_OF_TUPLE = False
     RUN_TUPLE = False
     RUN_CONSENSUS = False
