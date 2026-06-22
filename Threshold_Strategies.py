@@ -34,10 +34,10 @@ METHOD_CONFIG = {"embedding": "gemini", "metric": "cos"}
 SHOW_CURVES= False
 
 #Show validation heatmaps 
-SHOW_HEATMAPS=  True
+SHOW_HEATMAPS=  False
 
 # Rank all methods
-RANK_ALL=False
+RANK_ALL=True
 
 #________________ precomputed thresholds ____________________________
 
@@ -971,42 +971,50 @@ def plot_threshold_curves(method_config, t1, gap1, t2, f2, t3, f3, step=0.01):
 
 #___________rank methods according to best_f1_gap________________
 
-def rank_all_methods(methods_to_rank, lemmatize=False, remove_cond=False):
+def rank_all_methods(methods_to_rank):
 
-    print("_" * 70)
-    print(f"Method Ranking: (lemmatize= {lemmatize}, RCE= {remove_cond})")
-    print("_" * 70)
+    combinations = [
+        (False, False),
+        (True, False),
+        (False, True),
+        (True, True)
+    ]
+
+    print(f"\n{'Strategy 1 Best Gap Ranking (averaged over Lem/RCE combinations)'}")
+    print("-" * 45)
+    print(f"{'Method':<25} | {'Avg Best Gap':<14}")
+    print("-" * 45)
     
     global training_data, training_data_config
-    # Store original training data to restore it after ranking
     original_training_data = training_data.copy()
     original_config = training_data_config
     
-    results = []
+    rows = []
     for cfg in methods_to_rank:
         label = get_label(cfg)
         
-        #switch training data to the current method's embeddings/text
-        training_data = load_data(cfg, TRAINING_IDS, lemmatize, remove_cond)
-        training_data_config = cfg
-        
-        t, gap = strategy1(cfg, lemmatize=lemmatize, remove_cond=remove_cond)
-        results.append((label, gap, t))
-      
+        row_vals = []
+        for lemmatize, remove_cond in combinations:
+            #switch training data to the current method's embeddings/text
+            training_data = load_data(cfg, TRAINING_IDS, lemmatize, remove_cond)
+            training_data_config = cfg
+            
+            _, gap = strategy1(cfg, lemmatize=lemmatize, remove_cond=remove_cond)
+            row_vals.append(gap)
+                
+        row_avg = sum(row_vals) / len(row_vals)
+        rows.append((label, row_avg))
     
     # restore original training data
     training_data = original_training_data
     training_data_config = original_config
-    
-    #Sort by gap descending
-    results.sort(key=lambda x: x[1], reverse=True)
+
+    rows.sort(key=lambda x: x[1], reverse=True)
     
     # Print results
-    print(f"{'Method':<40} | {'Best Gap':<10} | {'Threshold':<10}")
-    print("-" * 70)
-    for label, gap, t in results:
-        print(f"{label:<40} | {gap:<10.2f} | {t:<10.2f}")
-    print("_" * 70)
+    for label, row_avg in rows:
+        print(f"{label:<25} | {row_avg:<14.2f}")
+    print("-" * 45)
 
 
 def print_all_thresholds():
@@ -1096,7 +1104,7 @@ if __name__ == "__main__":
     ]
     
     if RANK_ALL:
-        rank_all_methods(ALL_METHODS, lemmatize=LEMMATIZE, remove_cond=REMOVE_COND)
+        rank_all_methods(ALL_METHODS)
 
     #_________plots
     

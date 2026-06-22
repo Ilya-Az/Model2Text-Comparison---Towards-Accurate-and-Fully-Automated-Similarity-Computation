@@ -292,19 +292,20 @@ def get_threshold(embedding_method, metric, strategy=1, lemmatize=False, remove_
     return ts.get_precomputed_threshold(method_config, strategy, lemmatize, remove_cond)
 
 if __name__ == "__main__":
-    DOCS = ["01"]
+    DOCS = ["21"]
     #generate_and_save_all_embeddings(DOCS)
 
 
     LEMMATIZE_DATA = False
-    REMOVE_CONDITIONS = False
+    REMOVE_CONDITIONS = True
     
-    EMBEDDING_METHOD = "bert"
+    EMBEDDING_METHOD = "llm2vec"
     METRIC = "cos"
 
-    TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
+    TEXT = None#"The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
     
-    BPMN_XML =  """<testset xmlns="http://cpee.org/ns/properties/2.0">
+    BPMN_XML =  None
+    """<testset xmlns="http://cpee.org/ns/properties/2.0">
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">
       <call id="a1" endpoint="auto">

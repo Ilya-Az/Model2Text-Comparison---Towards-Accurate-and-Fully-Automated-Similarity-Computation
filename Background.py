@@ -339,16 +339,17 @@ def plot_similarity_heatmap(data, traditional_method, title_prefix="Similarity H
 if __name__ == "__main__":
     import Datasets
     
-    DOC_ID = "01"
+    DOC_ID = "21"
     METHOD = "levenshtein"
     STRATEGY = 1
     LEMMATIZE = True
-    REMOVE_COND = True
+    REMOVE_COND = False
 
    
-    TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
+    TEXT = None#"The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
     
-    BPMN_XML ="""<testset xmlns="http://cpee.org/ns/properties/2.0">
+    BPMN_XML =None
+    """<testset xmlns="http://cpee.org/ns/properties/2.0">
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">
       <call id="a1" endpoint="auto">

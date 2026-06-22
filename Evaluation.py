@@ -650,7 +650,7 @@ if __name__ == "__main__":
     import Further_Dimension_Approaches as fda
 
     # --- CONFIGURATION ---
-    model_ids = ["19", "20", "21"]#"01","02","03","04","05","06","07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"
+    model_ids = ["19", "20", "21"]#
    
     LEMMATIZE = False
     REMOVE_COND = False
