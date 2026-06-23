@@ -12,29 +12,30 @@ import textwrap
 
 
 # ____________________ config _________________________________________________________________________________
-DOC_ID = "01"
+DOC_ID = "19"
 STRATEGY = 1  # 1: F1-Gap, 2: Diagonal GT, 3: Generated GT
-LEMMATIZE = False
-REMOVE_COND = False
+LEMMATIZE = True
+REMOVE_COND = True
 
 
-METHOD_CONFIG = {"embedding": "bert", "metric": "cos"}
-#{"traditional": "levenshtein"}
+#METHOD_CONFIG = {"embedding": "llm2vec", "metric": "cos"}
+METHOD_CONFIG ={"traditional": "levenshtein"}
 
 
 CONSENSUS_METHODS = [
     # {"embedding":"bert", "metric":"cos"},
-    {"traditional": "levenshtein"},
-    {"embedding": "gemini", "metric": "cos"}
-    
+    # {"traditional": "levenshtein"},
+    # {"embedding": "gemini", "metric": "cos"},
+    {"embedding": "llm2vec", "metric": "cos"}
 ]
 RUN_CONSENSUS = False
 RUN_TUPLE = False
 RUN_BEST_OF_TUPLE = True
 
-TEXT = "The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
+TEXT = None#"The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
     
-BPMN_XML = """<testset xmlns="http://cpee.org/ns/properties/2.0">
+BPMN_XML = None
+"""<testset xmlns="http://cpee.org/ns/properties/2.0">
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">
       <call id="a1" endpoint="auto">

@@ -7,6 +7,8 @@ from Background import get_chronological_max_indices
 import time
 import AutoBPMN_AI_Service as AutoBPMN
 
+import Datasets
+import Further_Dimension_Approaches as fda
 
 def text_similarity(sim_matrix, ground_truth, printing=True):
     #calculates the Spearman Correlation
@@ -229,6 +231,78 @@ def print_model2text_table(doc_ids, strategy=1):
     col_str += f" | {o_str:<20}"
     print(col_str)
     print("-" * 145)
+
+def print_tuple_table(doc_ids, approach, strategy=1):
+    
+    ALL_METHODS = [
+        {"traditional": "levenshtein"},
+        {"traditional": "jaccard"},
+        {"traditional": "wordnet"},
+        {"traditional": "tfidf"},
+        {"traditional": "word2vec"},
+        {"embedding": "bert", "metric": "cos"},
+        {"embedding": "bert", "metric": "eu"},
+        {"embedding": "bert", "metric": "man"},
+        {"embedding": "gemini", "metric": "cos"},
+        {"embedding": "llm2vec", "metric": "cos"},
+        {"embedding": "llm2vec", "metric": "eu"},
+        {"embedding": "llm2vec", "metric": "man"},
+    ]
+
+    remove_cond = True
+
+    title = "Tuple Matching" if approach == "tuple" else "Best-Of-Tuple Matching"
+    print(f"\n{title + ' Jaccard / F1 Table for Docs: ' + ', '.join(doc_ids)}")
+    print("-" * 55)
+    print(f"{'Method':<25} | {'Jaccard / F1':<20} ")
+    print("-" * 55)
+
+    rows = []
+    for method in ALL_METHODS:
+        label = get_label(method)
+        lemmatize = "traditional" in method
+
+        avg_jac = 0
+        avg_f1 = 0
+        docs = 0
+
+        for doc_id in doc_ids:
+            data_dict = ts.load_data(method, [doc_id], lemmatize, remove_cond)
+            data = data_dict[doc_id]
+            ground_truth = Datasets.get_ground_truth(doc_id)
+            best_t = ts.get_precomputed_threshold(method, strategy, lemmatize, remove_cond)
+
+            if approach == "tuple":
+                sim_tuple, s_tuples, t_tuples, s_ranges, t_ranges = fda.tuple_matching(data, method)
+                jaccard, f1 = tuple_eval(sim_tuple, s_ranges, t_ranges, ground_truth, best_t)
+            else:
+                sim_best, groups = fda.best_of_tuple_matching(data, method)
+                jaccard, f1 = best_of_tuple_eval(sim_best, groups, ground_truth, best_t)
+
+            avg_jac += jaccard
+            avg_f1 += f1
+            docs += 1
+
+        avg_jac /= docs
+        avg_f1 /= docs
+        rows.append((label, avg_jac, avg_f1))
+
+    rows.sort(key=lambda x: x[2], reverse=True)
+
+    sum_jac = 0
+    sum_f1 = 0
+    for label, jac, f1 in rows:
+        val_str = f"{jac:.2f} / {f1:.2f}"
+        print(f"{label:<25} | {val_str:<20}")
+        sum_jac += jac
+        sum_f1 += f1
+
+    print("-" * 55)
+    n = len(rows)
+    avg_str = f"{sum_jac/n:.2f} / {sum_f1/n:.2f}"
+    print(f"{'Average':<25} | {avg_str:<20}")
+    print("-" * 55)
+
 
 def model2text_similarity(sim_matrix, ground_truth, threshold):
     rows, cols = sim_matrix.shape
@@ -650,29 +724,32 @@ if __name__ == "__main__":
     import Further_Dimension_Approaches as fda
 
     # --- CONFIGURATION ---
-    model_ids = ["19", "20", "21"]#
+    model_ids = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"]#
    
-    LEMMATIZE = False
-    REMOVE_COND = False
+    LEMMATIZE = True
+    REMOVE_COND = True
     STRATEGY = 1 
 
     EMBEDDING_METHOD   = None #"bert"
     METRIC             = None#"cos"  
-    TRADITIONAL_METHOD = "levenshtein" # only used if EMBEDDING_METHOD is None
+    TRADITIONAL_METHOD = "jaccard" # only used if EMBEDDING_METHOD is None
 
     
     CONSENSUS_METHODS = [
-        {"traditional": "levenshtein"},
-        {"embedding": "bert", "metric": "cos"}
+        #{"traditional": "levenshtein"},
+        {"embedding": "llm2vec", "metric": "cos"},
+        {"embedding": "gemini", "metric": "cos"}
     ]
 
     RUN_TEXT_SIM  = False
     RUN_SPEARMAN_TABLE = False
     RUN_MODEL2TEXT = False
-    RUN_MODEL2TEXT_TABLE = True
+    RUN_MODEL2TEXT_TABLE = False
     RUN_BEST_OF_TUPLE = False
     RUN_TUPLE = False
     RUN_CONSENSUS = False
+    RUN_TUPLE_TABLE = True
+    RUN_BEST_OF_TUPLE_TABLE = False
     RUN_BENCHMARK = False
   
 
@@ -681,6 +758,10 @@ if __name__ == "__main__":
         
     if RUN_MODEL2TEXT_TABLE:
         print_model2text_table(model_ids, STRATEGY)
+    if RUN_TUPLE_TABLE:
+        print_tuple_table(model_ids, STRATEGY)
+    if RUN_BEST_OF_TUPLE_TABLE:
+        print_tuple_table(model_ids, STRATEGY)
   
     if not RUN_BENCHMARK and not RUN_SPEARMAN_TABLE and not RUN_MODEL2TEXT_TABLE:
         if EMBEDDING_METHOD is not None:

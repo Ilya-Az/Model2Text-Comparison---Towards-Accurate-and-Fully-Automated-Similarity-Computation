@@ -18,14 +18,14 @@ from Background import (
 
 #____________________ config _________________________________________________________________________________
 TRAINING_IDS = ["01","02","03","04","05","06","07","08","09","10"] #--> training_IDs for calclating the optimal thresholds
-VALIDATION_IDS = ["13"] #--> validation_IDs for testing the optimal thresholds
+VALIDATION_IDS = ["16"] #--> validation_IDs for testing the optimal thresholds
 
 
 LEMMATIZE = False  
-REMOVE_COND=False    
+REMOVE_COND=True    
 
 #either embedding or traditional
-METHOD_CONFIG = {"embedding": "gemini", "metric": "cos"}
+METHOD_CONFIG = {"embedding": "llm2vec", "metric": "cos"}
 #METHOD_CONFIG = {"traditional": "levenshtein"}
 
 #________________ what to show
@@ -34,10 +34,10 @@ METHOD_CONFIG = {"embedding": "gemini", "metric": "cos"}
 SHOW_CURVES= False
 
 #Show validation heatmaps 
-SHOW_HEATMAPS=  False
+SHOW_HEATMAPS=  True
 
 # Rank all methods
-RANK_ALL=True
+RANK_ALL=False
 
 #________________ precomputed thresholds ____________________________
 

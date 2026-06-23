@@ -339,11 +339,11 @@ def plot_similarity_heatmap(data, traditional_method, title_prefix="Similarity H
 if __name__ == "__main__":
     import Datasets
     
-    DOC_ID = "21"
+    DOC_ID = "19"
     METHOD = "levenshtein"
     STRATEGY = 1
     LEMMATIZE = True
-    REMOVE_COND = False
+    REMOVE_COND = True
 
    
     TEXT = None#"The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
