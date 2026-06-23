@@ -12,25 +12,25 @@ import textwrap
 
 
 # ____________________ config _________________________________________________________________________________
-DOC_ID = "19"
+DOC_ID = "01"
 STRATEGY = 1  # 1: F1-Gap, 2: Diagonal GT, 3: Generated GT
-LEMMATIZE = True
+LEMMATIZE = False
 REMOVE_COND = True
 
 
-#METHOD_CONFIG = {"embedding": "llm2vec", "metric": "cos"}
-METHOD_CONFIG ={"traditional": "levenshtein"}
+METHOD_CONFIG = {"embedding": "bert", "metric": "man"}
+#METHOD_CONFIG ={"traditional": "levenshtein"}
 
 
 CONSENSUS_METHODS = [
     # {"embedding":"bert", "metric":"cos"},
-    # {"traditional": "levenshtein"},
+     {"traditional": "levenshtein"},
     # {"embedding": "gemini", "metric": "cos"},
     {"embedding": "llm2vec", "metric": "cos"}
 ]
-RUN_CONSENSUS = False
+RUN_CONSENSUS = True
 RUN_TUPLE = False
-RUN_BEST_OF_TUPLE = True
+RUN_BEST_OF_TUPLE = False
 
 TEXT = None#"The customer places an order. We receive the order and process the payment. Finally, the goods are shipped to the customer."
     
@@ -76,13 +76,15 @@ def get_method_label(method_config):
 
 
 
-def consensus_matching(doc_id, method_configs, strategy=1, lemmatize=False, remove_cond=False, text=None, bpmn_xml=None):
+def consensus_matching(doc_id, method_configs, strategy=1, lemmatize=False, remove_cond=False, text=None, bpmn_xml=None, evaluation=False):
     num_methods = len(method_configs)
     min_confidence = int(num_methods * 2 / 3)
     method_labels = []
     for cfg in method_configs:
         method_labels.append(get_method_label(cfg))
 
+    if evaluation:
+        remove_cond = True
 
     # ______Match Extraction______
     # for each method:load data, compute similarity, get its threshold, extract thresholded matches
@@ -91,7 +93,11 @@ def consensus_matching(doc_id, method_configs, strategy=1, lemmatize=False, remo
     sentences, tasks = None, None
 
     for cfg in method_configs:
-        data = ts.load_data(cfg, [doc_id], lemmatize, remove_cond, text=text, bpmn_xml=bpmn_xml)[doc_id]
+        if evaluation:
+            method_lemmatize = "traditional" in cfg
+        else:
+            method_lemmatize = lemmatize
+        data = ts.load_data(cfg, [doc_id], method_lemmatize, remove_cond, text=text, bpmn_xml=bpmn_xml)[doc_id]
         if sentences is None:
             sentences,tasks=data["sentences"],data["tasks"]
 
@@ -99,9 +105,9 @@ def consensus_matching(doc_id, method_configs, strategy=1, lemmatize=False, remo
 
         # get the optimal threshold for this individual method
         if "embedding" in cfg:
-            t = emb.get_threshold(cfg["embedding"], cfg["metric"], strategy, lemmatize, remove_cond)
+            t = emb.get_threshold(cfg["embedding"], cfg["metric"], strategy, method_lemmatize, remove_cond)
         else:
-            t = bg.get_threshold(cfg["traditional"], strategy, lemmatize, remove_cond)
+            t = bg.get_threshold(cfg["traditional"], strategy, method_lemmatize, remove_cond)
         method_thresholds.append(t)
         #print(f"  {get_method_label(cfg)}: threshold = {t:.2f} (Strategy {strategy})")
 

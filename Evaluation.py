@@ -232,7 +232,7 @@ def print_model2text_table(doc_ids, strategy=1):
     print(col_str)
     print("-" * 145)
 
-def print_tuple_table(doc_ids, approach, strategy=1):
+def print_further_dim_table(doc_ids, approach, strategy=1, consensus_methods=None):
     
     ALL_METHODS = [
         {"traditional": "levenshtein"},
@@ -251,57 +251,126 @@ def print_tuple_table(doc_ids, approach, strategy=1):
 
     remove_cond = True
 
-    title = "Tuple Matching" if approach == "tuple" else "Best-Of-Tuple Matching"
-    print(f"\n{title + ' Jaccard / F1 Table for Docs: ' + ', '.join(doc_ids)}")
-    print("-" * 55)
-    print(f"{'Method':<25} | {'Jaccard / F1':<20} ")
-    print("-" * 55)
-
-    rows = []
-    for method in ALL_METHODS:
-        label = get_label(method)
-        lemmatize = "traditional" in method
-
-        avg_jac = 0
-        avg_f1 = 0
+    if approach == "consensus":
+        cons_jac = 0
+        cons_f1 = 0
         docs = 0
-
         for doc_id in doc_ids:
-            data_dict = ts.load_data(method, [doc_id], lemmatize, remove_cond)
-            data = data_dict[doc_id]
             ground_truth = Datasets.get_ground_truth(doc_id)
-            best_t = ts.get_precomputed_threshold(method, strategy, lemmatize, remove_cond)
-
-            if approach == "tuple":
-                sim_tuple, s_tuples, t_tuples, s_ranges, t_ranges = fda.tuple_matching(data, method)
-                jaccard, f1 = tuple_eval(sim_tuple, s_ranges, t_ranges, ground_truth, best_t)
-            else:
-                sim_best, groups = fda.best_of_tuple_matching(data, method)
-                jaccard, f1 = best_of_tuple_eval(sim_best, groups, ground_truth, best_t)
-
-            avg_jac += jaccard
-            avg_f1 += f1
+            consensus_sim, sentences, tasks, match_f1, m_labels = fda.consensus_matching(
+                doc_id, consensus_methods, strategy=strategy, evaluation=True
+            )
+            num_methods = len(consensus_methods)
+            min_confidence = int(num_methods * 2 / 3)
+            consensus_t = min_confidence / num_methods
+            jac, f1 = consensus_eval(consensus_sim, ground_truth, consensus_t)
+            cons_jac += jac
+            cons_f1 += f1
             docs += 1
+        cons_jac /= docs
+        cons_f1 /= docs
+        cons_str = f"{cons_jac:.2f} / {cons_f1:.2f}"
 
-        avg_jac /= docs
-        avg_f1 /= docs
-        rows.append((label, avg_jac, avg_f1))
+        # method model2text scores
+        rows = []
+        for method in consensus_methods:
+            label = get_label(method)
+            lemmatize = "traditional" in method
 
-    rows.sort(key=lambda x: x[2], reverse=True)
+            m_jac = 0
+            m_f1 = 0
+            m_docs = 0
+            for doc_id in doc_ids:
+                data_dict = ts.load_data(method, [doc_id], lemmatize, True)
+                data = data_dict[doc_id]
+                sim_matrix = ts.get_sim_matrix(data, method)
+                ground_truth = Datasets.get_ground_truth(doc_id)
+                best_t = ts.get_precomputed_threshold(method, strategy, lemmatize, True)
+                jac, f1 = model2text_similarity(sim_matrix, ground_truth, best_t)
+                m_jac += jac
+                m_f1 += f1
+                m_docs += 1
+            m_jac /= m_docs
+            m_f1 /= m_docs
+            rows.append((label, m_jac, m_f1))
 
-    sum_jac = 0
-    sum_f1 = 0
-    for label, jac, f1 in rows:
-        val_str = f"{jac:.2f} / {f1:.2f}"
-        print(f"{label:<25} | {val_str:<20}")
-        sum_jac += jac
-        sum_f1 += f1
+        print(f"\nConsensus Matching Jaccard / F1 Table for Docs: {', '.join(doc_ids)}")
+        print("-" * 80)
+        print(f"{'Method':<25} | {'Model2Text Jac/F1':<20} | {'Consensus Jac/F1':<20}")
+        print("-" * 80)
+        for label, jac, f1 in rows:
+            val_str = f"{jac:.2f} / {f1:.2f}"
+            print(f"{label:<25} | {val_str:<20} | {cons_str:<20}")
+        print("-" * 80)
+        return
+    else:
+        title = "Tuple Matching" if approach == "tuple" else "Best-Of-Tuple Matching"
+        print(f"\n{title + ' Jaccard / F1 Table for Docs: ' + ', '.join(doc_ids)}")
+        print("-" * 80)
+        print(f"{'Method':<25} | {'Model2Text Jac/F1':<20} | {title + ' Jac/F1':<20}")
+        print("-" * 80)
 
-    print("-" * 55)
-    n = len(rows)
-    avg_str = f"{sum_jac/n:.2f} / {sum_f1/n:.2f}"
-    print(f"{'Average':<25} | {avg_str:<20}")
-    print("-" * 55)
+        rows = []
+        for method in ALL_METHODS:
+            label = get_label(method)
+            lemmatize = "traditional" in method
+
+            # model2text scores
+            m2t_jac= 0
+            m2t_f1 = 0
+            # tuple/best-of-tuple scores
+            fd_jac = 0
+            fd_f1= 0
+            docs= 0
+
+            for doc_id in doc_ids:
+                data_dict =ts.load_data(method, [doc_id], lemmatize, remove_cond)
+                data = data_dict[doc_id]
+                ground_truth=Datasets.get_ground_truth(doc_id)
+                best_t = ts.get_precomputed_threshold(method, strategy, lemmatize, remove_cond)
+
+                # normal model2text
+                sim_matrix = ts.get_sim_matrix(data, method)
+                jac, f1 =model2text_similarity(sim_matrix, ground_truth, best_t)
+                m2t_jac += jac
+                m2t_f1 += f1
+                if approach == "tuple":
+                    sim_tuple, s_tuples, t_tuples, s_ranges, t_ranges = fda.tuple_matching(data, method)
+                    jac, f1 = tuple_eval(sim_tuple, s_ranges, t_ranges, ground_truth, best_t)
+                else:
+                    sim_best, groups = fda.best_of_tuple_matching(data, method)
+                    jac, f1 = best_of_tuple_eval(sim_best, groups, ground_truth, best_t)
+                fd_jac += jac
+                fd_f1 += f1
+                docs += 1
+
+            m2t_jac/= docs
+            m2t_f1 /= docs
+            fd_jac /= docs
+            fd_f1 /= docs
+            rows.append((label, m2t_jac, m2t_f1, fd_jac, fd_f1))
+
+        rows.sort(key=lambda x: x[4], reverse=True)
+
+        sum_m2t_jac=0
+        sum_m2t_f1 =0
+        sum_fd_jac = 0
+        sum_fd_f1 = 0
+        for label, m2t_jac, m2t_f1, fd_jac, fd_f1 in rows:
+            m2t_str = f"{m2t_jac:.2f} / {m2t_f1:.2f}"
+            fd_str = f"{fd_jac:.2f} / {fd_f1:.2f}"
+            print(f"{label:<25} | {m2t_str:<20} | {fd_str:<20}")
+            sum_m2t_jac += m2t_jac
+            sum_m2t_f1 += m2t_f1
+            sum_fd_jac += fd_jac
+            sum_fd_f1 += fd_f1
+
+        print("-" * 80)
+        n = len(rows)
+        m2t_avg = f"{sum_m2t_jac/n:.2f} / {sum_m2t_f1/n:.2f}"
+        fd_avg = f"{sum_fd_jac/n:.2f} / {sum_fd_f1/n:.2f}"
+        print(f"{'Average':<25} | {m2t_avg:<20} | {fd_avg:<20}")
+        print("-" * 80)
 
 
 def model2text_similarity(sim_matrix, ground_truth, threshold):
@@ -720,23 +789,20 @@ def get_gen_GT(doc_id):
 
 
 if __name__ == "__main__":
-    import Datasets
-    import Further_Dimension_Approaches as fda
 
-    # --- CONFIGURATION ---
-    model_ids = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"]#
+    model_ids = ["01" ,"10","17","21"]#"01" ,"10","17","21"
    
     LEMMATIZE = True
     REMOVE_COND = True
     STRATEGY = 1 
 
-    EMBEDDING_METHOD   = None #"bert"
-    METRIC             = None#"cos"  
-    TRADITIONAL_METHOD = "jaccard" # only used if EMBEDDING_METHOD is None
+    EMBEDDING_METHOD   = None#"llm2vec"
+    METRIC             = None#"cos"
+    TRADITIONAL_METHOD = "levenshtein" # only used if EMBEDDING_METHOD is None
 
     
     CONSENSUS_METHODS = [
-        #{"traditional": "levenshtein"},
+        {"traditional": "levenshtein"},
         {"embedding": "llm2vec", "metric": "cos"},
         {"embedding": "gemini", "metric": "cos"}
     ]
@@ -748,8 +814,9 @@ if __name__ == "__main__":
     RUN_BEST_OF_TUPLE = False
     RUN_TUPLE = False
     RUN_CONSENSUS = False
-    RUN_TUPLE_TABLE = True
-    RUN_BEST_OF_TUPLE_TABLE = False
+    RUN_TUPLE_TABLE = False
+    RUN_BEST_OF_TUPLE_TABLE = True
+    RUN_CONSENSUS_TABLE = False
     RUN_BENCHMARK = False
   
 
@@ -759,9 +826,11 @@ if __name__ == "__main__":
     if RUN_MODEL2TEXT_TABLE:
         print_model2text_table(model_ids, STRATEGY)
     if RUN_TUPLE_TABLE:
-        print_tuple_table(model_ids, STRATEGY)
+        print_further_dim_table(model_ids, "tuple", STRATEGY)
     if RUN_BEST_OF_TUPLE_TABLE:
-        print_tuple_table(model_ids, STRATEGY)
+        print_further_dim_table(model_ids, "best_of_tuple", STRATEGY)
+    if RUN_CONSENSUS_TABLE:
+        print_further_dim_table(model_ids, "consensus", STRATEGY, consensus_methods=CONSENSUS_METHODS)
   
     if not RUN_BENCHMARK and not RUN_SPEARMAN_TABLE and not RUN_MODEL2TEXT_TABLE:
         if EMBEDDING_METHOD is not None:
