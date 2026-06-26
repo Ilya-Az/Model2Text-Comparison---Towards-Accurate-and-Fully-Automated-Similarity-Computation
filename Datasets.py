@@ -212,7 +212,7 @@ def load_dataset(doc_id, lemmatized=False,remove_conditions=False):
 
 #load custom data (important for AutoBPMN.AI for custom input)
 def get_data(doc_id=None, text=None, bpmn_xml=None, lemmatized=False, remove_conditions=False):
-    # Load data either from a doc_id OR from directly provided text + bpmn_xml.
+    # Load data either from a doc_id or from directly provided text + bpmn_xml.
     if text is not None and bpmn_xml is not None:
         tasks = task_extraction(bpmn_xml)
         sentences = sentence_extraction(text)
