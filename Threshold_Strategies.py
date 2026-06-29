@@ -276,7 +276,7 @@ def get_mixed_sim_matrices(ids, method_config, data_source):
 def strategy1(method_config, step=0.01, lemmatize=False, remove_cond=False):
     #F1-Gap Maximization across different Models
 
-    #if function invoked by other classes (traing data not loaded)
+    #if function invoked by other classes (training data not loaded)
     global training_data, training_data_config
     if not training_data or training_data_config != method_config:
         print(f"Loading data with configuration: {method_config}")
@@ -369,7 +369,7 @@ def f1_with_diagonal_GT(matrix, threshold, gt_variance):
 def strategy2(method_config, step=0.01, lemmatize=False, remove_cond=False):
     #GT-F1 Max with Diagonal approximation across different Models
 
-    #if function invoked by other classes (traing data not loaded)
+    #if function invoked by other classes (training data not loaded)
     global training_data, training_data_config
     if not training_data or training_data_config != method_config:
         print(f"Loading data with configuration: {method_config}")
@@ -452,7 +452,7 @@ def strategy3(method_config, step=0.01, lemmatize=False, remove_cond=False):
     # GT-F1 Maximization with True gen GT
     #-->Like Strategy 2 but replaces the diagonal approximation
   
-    #if function invoked by other classes (traing data not loaded)
+    #if function invoked by other classes (training data not loaded)
     global training_data, training_data_config
     if not training_data or training_data_config != method_config:
         print(f"Loading data with configuration: {method_config}")

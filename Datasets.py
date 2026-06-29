@@ -74,7 +74,7 @@ https-get://cpee.org/ing/correlators/message/receive/
 </testset>"""
 
 def task_extraction(filepath_or_xml):
-    #detrmine if the input is a XML string or a file path
+    #determine if the input is a XML string or a file path
     if isinstance(filepath_or_xml, str) and filepath_or_xml.strip().startswith("<"):
         xml_content = filepath_or_xml
     else:

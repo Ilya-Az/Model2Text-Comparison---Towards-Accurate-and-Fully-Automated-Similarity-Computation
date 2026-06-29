@@ -340,7 +340,7 @@ def best_of_tuple_matching(data, method_config):
                 merged_sim = compute_merged_similarity(sj, current + [next_index], sentences,tasks, method_config,emb_sentences)
                 next_task_sim = base_sim[sj, next_index]
 
-                # merge only if merged similarity increases and exceeds next individuel similiarity
+                # merge only if merged similarity increases and exceeds next individual similarity
                 if merged_sim > max(cur_sim, next_task_sim):
                     current.append(next_index)
                     cur_sim =merged_sim
@@ -429,7 +429,7 @@ def best_of_tuple_matching(data, method_config):
 
 
 def visualize_best_of_tuple_heatmap(doc_id, sim_matrix, combo_source, sentences, tasks, method_config):
-    # build labels with cutom task labels: e.g. "T1: ... . T2: ..."
+    # build labels with cutom task labels e.g. T1: ... . T2: ...
     col_labels=[]
     for grp in combo_source:
         temp_c=[]

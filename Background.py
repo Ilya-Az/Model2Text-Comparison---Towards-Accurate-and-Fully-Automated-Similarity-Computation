@@ -187,7 +187,7 @@ def compute_similarity_matrix(traditional_method, sentences, tasks):
             for i, t in enumerate(tasks):
                 sim_matrix[j, i] = Word2Vec_similarity(s, t)
 
-    return np.round(sim_matrix.astype(np.float64), 2)#accurate roudning
+    return np.round(sim_matrix.astype(np.float64), 2)#accurate rounding
 
 
 
