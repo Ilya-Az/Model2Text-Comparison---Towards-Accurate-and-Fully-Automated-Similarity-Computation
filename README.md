@@ -75,8 +75,8 @@ The .env file is listed in .gitignore and will not be pushed to GitHub.
 python API.py
 ```
 
-The Flask server starts locally. Send a POST request with the following JSON body (e.g. via Postman):
-Replace the placeholders with the appropriate input.
+The Flask server starts locally. Send a POST request with the following JSON body (e.g. via Postman).
+Replace the placeholders with the appropriate input:
 ```
 {
   "similarity_panel": true,
@@ -92,7 +92,7 @@ Replace the placeholders with the appropriate input.
 }
 ```
 
-One example for MacOS for use in the terminal:
+One example for MacOS using the terminal:
 ```bash
 curl -X POST http://localhost:5001/api/analyze \
   -H "Content-Type: application/json" \
